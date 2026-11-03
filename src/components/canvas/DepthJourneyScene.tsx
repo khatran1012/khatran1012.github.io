@@ -15,6 +15,7 @@ interface SceneProps {
   active: boolean;
   reducedMotion: boolean;
   theme: 'light' | 'dark';
+  focusedNode: string | null;
   onInspect: (board: number, node: string) => void;
   onReady: () => void;
   onUnavailable: () => void;
@@ -38,7 +39,7 @@ function signalCurve(from: number, fromNode: number, to: number, toNode: number,
   return new THREE.CatmullRomCurve3([start, start.clone().add(new THREE.Vector3(returnOffset, 0.8, -1.3)), end.clone().add(new THREE.Vector3(returnOffset, 0.8, 1.3)), end], false, 'centripetal');
 }
 
-function HardwareWorld({ motion, wake, active, reducedMotion, theme, onInspect, onReady, onUnavailable, onSlowFrames }: SceneProps & { onSlowFrames: () => void }) {
+function HardwareWorld({ motion, wake, active, reducedMotion, theme, focusedNode, onInspect, onReady, onUnavailable, onSlowFrames }: SceneProps & { onSlowFrames: () => void }) {
   const { camera, scene, gl, invalidate, size, viewport } = useThree();
   const assembly = useRef<THREE.Group>(null);
   const rim = useRef<THREE.PointLight>(null);
@@ -57,7 +58,7 @@ function HardwareWorld({ motion, wake, active, reducedMotion, theme, onInspect, 
   const samples = useRef<Record<string, { frames: number[]; calls: number; triangles: number }>>({});
   const lastFrameAt = useRef(0);
   const wasAnimating = useRef(false);
-  const scratch = useMemo(() => ({ camera: new THREE.Vector3(), look: new THREE.Vector3(), start: new THREE.Vector3(), end: new THREE.Vector3(), normal: new THREE.Vector3(), rotation: new THREE.Euler(), color: new THREE.Color(), mood: new THREE.Color() }), []);
+  const scratch = useMemo(() => ({ camera: new THREE.Vector3(), look: new THREE.Vector3(), start: new THREE.Vector3(), end: new THREE.Vector3(), normal: new THREE.Vector3(), orbit: new THREE.Spherical(), rotation: new THREE.Euler(), color: new THREE.Color(), mood: new THREE.Color() }), []);
   const signals = useMemo(() => JOURNEY_CONNECTIONS.map((connection) => {
     const path = signalCurve(connection.from, connection.fromNode, connection.to, connection.toNode, false);
     const endPath = signalCurve(connection.from, connection.fromNode, connection.to, connection.toNode, true);
@@ -135,13 +136,21 @@ function HardwareWorld({ motion, wake, active, reducedMotion, theme, onInspect, 
       scratch.look.add(scratch.start.fromArray(BOARD_POSITIONS[focusBoard]).lerp(scratch.end.fromArray(ASSEMBLED_POSITIONS[focusBoard]), closing));
       scratch.look.applyEuler(assembly.current.rotation);
       scratch.normal.set(0, 0, 1).applyEuler(scratch.rotation).applyEuler(assembly.current.rotation);
-      scratch.camera.copy(scratch.look).addScaledVector(scratch.normal, input.focusDistance);
+      const focusFit = Math.max(1, 1.4 / (size.width / Math.max(1, size.height)));
+      scratch.camera.copy(scratch.look).addScaledVector(scratch.normal, input.focusDistance * focusFit);
     }
     if (!focus) {
       const fit = Math.max(1, 1.6 / (size.width / Math.max(1, size.height)));
       scratch.normal.subVectors(scratch.camera, scratch.look).multiplyScalar(fit);
       scratch.camera.copy(scratch.look).add(scratch.normal);
     }
+    // Orbit the camera around the active layer/node, keeping its position stable.
+    // Rotating the assembly moves distant layers away from their inspection view.
+    scratch.normal.subVectors(scratch.camera, scratch.look);
+    scratch.orbit.setFromVector3(scratch.normal);
+    scratch.orbit.theta += input.yaw;
+    scratch.orbit.phi = THREE.MathUtils.clamp(scratch.orbit.phi + input.pitch, 0.15, Math.PI - 0.15);
+    scratch.camera.copy(scratch.look).add(scratch.normal.setFromSpherical(scratch.orbit));
     if (!reducedMotion) {
       scratch.camera.x += input.pointerX * 0.12;
       scratch.camera.y += input.pointerY * 0.08;
@@ -150,22 +159,21 @@ function HardwareWorld({ motion, wake, active, reducedMotion, theme, onInspect, 
     else { camera.position.lerp(scratch.camera, 1 - Math.exp(-8 * delta)); look.current.lerp(scratch.look, 1 - Math.exp(-8 * delta)); }
     camera.lookAt(look.current);
     camera.rotateZ(velocity.current * 0.014);
-    const overviewWeight = input.selectedNode ? 0 : 1 - THREE.MathUtils.smoothstep(travel, 0.1, 0.9) + closing;
-    const yaw = reducedMotion ? 0 : input.yaw * overviewWeight + velocity.current * 0.035;
-    const pitch = reducedMotion ? 0 : input.pitch * overviewWeight;
+    const yaw = reducedMotion ? 0 : velocity.current * 0.035;
+    const pitch = 0;
     assembly.current.rotation.y = THREE.MathUtils.damp(assembly.current.rotation.y, yaw, 8, delta);
     assembly.current.rotation.x = THREE.MathUtils.damp(assembly.current.rotation.x, pitch, 8, delta);
     boards.current.forEach((board, index) => {
       board?.position.fromArray(BOARD_POSITIONS[index]).lerp(scratch.end.fromArray(ASSEMBLED_POSITIONS[index]), closing);
       // Keep only the departing/arriving sculptures during travel, not all five.
-      if (board) board.visible = travel < 0.8 || closing > 0 || index === Math.max(0, step - 1) || index === Math.min(4, step);
+      if (board) board.visible = focus && Math.abs(travel - focus.board - 1) < 0.15 ? index === focus.board : travel < 0.8 || closing > 0 || index === Math.max(0, step - 1) || index === Math.min(4, step);
     });
     scratch.color.set(EXHIBITION_LAYERS[Math.max(0, step - 1)].color).lerp(scratch.mood.set(EXHIBITION_LAYERS[Math.min(4, step)].color), blend);
     scratch.mood.set(theme === 'light' ? '#f4f6fa' : '#070b18').lerp(scratch.color, theme === 'light' ? 0.012 : 0.004);
     (scene.background as THREE.Color).lerp(scratch.mood, reducedMotion ? 1 : 1 - Math.exp(-4 * delta));
     const fog = scene.fog as THREE.FogExp2;
     fog.color.copy(scene.background as THREE.Color);
-    const energy = reducedMotion ? 0 : THREE.MathUtils.clamp((input.interactionAt + 1800 - performance.now()) / 1800, 0, 1);
+    const energy = reducedMotion || input.selectedNode ? 0 : THREE.MathUtils.clamp((input.interactionAt + 1800 - performance.now()) / 1800, 0, 1);
     signalTime.current += delta * (0.65 + Math.abs(velocity.current) * 0.65);
     signals.forEach(({ path, endPath }, index) => {
       const trail = trails.current[index];
@@ -190,7 +198,7 @@ function HardwareWorld({ motion, wake, active, reducedMotion, theme, onInspect, 
     });
     nodeLeds.current.forEach((object) => {
       const selected = object.name.slice(5) === input.selectedNode || object.name.slice(5) === input.hoveredNode;
-      (object.material as THREE.MeshStandardMaterial).emissiveIntensity = selected ? 0.25 : 0.06;
+      (object.material as THREE.MeshStandardMaterial).emissiveIntensity = selected ? 0.25 : input.selectedNode ? 0.015 : 0.06;
       object.scale.setScalar(selected ? 1.08 : 1);
     });
     const moving = progress.current !== targetProgress || camera.position.distanceToSquared(scratch.camera) > 0.000001 || look.current.distanceToSquared(scratch.look) > 0.000001
@@ -230,7 +238,7 @@ function HardwareWorld({ motion, wake, active, reducedMotion, theme, onInspect, 
       <directionalLight position={[3, 8, 10]} intensity={2.8} color="#fff0da" />
       <directionalLight position={[-8, 2, -8]} intensity={2} color="#9cbfff" />
       <pointLight ref={rim} color="#4ff5e9" intensity={9} distance={7} decay={2} />
-      <Galaxy theme={theme} />
+      <Galaxy theme={theme} focused={!!focusedNode} />
       <group ref={assembly}>
         {EXHIBITION_LAYERS.map((layer, index) => (
           <group key={layer.id} ref={(node) => { boards.current[index] = node; }} position={BOARD_POSITIONS[index]}>

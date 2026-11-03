@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowDownRight, X } from 'lucide-react';
@@ -9,7 +9,7 @@ export function ExperienceDetail({ exhibit, image, reduced, onClose }: { exhibit
   const [shown, setShown] = useState(false);
   const closeButton = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!exhibit || !dialog.current) return;
     returnFocus.current = document.activeElement as HTMLElement;
     const previous = document.body.style.overflow;
@@ -24,6 +24,7 @@ export function ExperienceDetail({ exhibit, image, reduced, onClose }: { exhibit
     onClose();
     returnFocus.current?.focus({ preventScroll: true });
   };
+  if (!exhibit) return null;
   return createPortal(<dialog ref={dialog} className="career-detail" aria-labelledby="career-detail-title"
     onKeyDown={event => {
       if (event.key !== 'Tab') return;

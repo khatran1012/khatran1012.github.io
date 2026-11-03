@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   RotateCcw,
   ExternalLink,
@@ -116,7 +116,7 @@ export const SculptureCanvas: React.FC = () => {
 
   const activeNode = SYSTEM_NODES.find((n) => n.id === activeNodeId) || null;
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!activeNode || !hudRef.current) return;
     const position = () => {
       const anchor = viewerRef.current?.querySelector(`[data-node="${activeNode.id}"]`)?.getBoundingClientRect();
@@ -220,7 +220,7 @@ export const SculptureCanvas: React.FC = () => {
               width="2048"
               height="1152"
               loading="eager"
-              fetchPriority="high"
+              {...{ fetchpriority: 'high' }}
               decoding="async"
             />
           </picture>

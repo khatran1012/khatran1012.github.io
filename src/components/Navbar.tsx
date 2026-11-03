@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon, Download, Menu, X } from 'lucide-react';
+import { Sun, Moon, ArrowUpRight, Menu, X } from 'lucide-react';
 import { PERSONAL_INFO } from '../data/cvData';
 
 interface NavbarProps {
@@ -13,6 +13,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
   const [activeChapter, setActiveChapter] = useState('#origin');
 
   useEffect(() => {
+    if (!('IntersectionObserver' in window)) return;
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) setActiveChapter(`#${entry.target.id}`);
@@ -33,9 +34,9 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
 
   const chapters = [
     { num: '01', label: 'Origin', href: '#origin' },
-    { num: '02', label: 'The System', href: '#system' },
-    { num: '03', label: 'Under Pressure', href: '#pressure' },
-    { num: '04', label: 'Reality', href: '#reality' },
+    { num: '02', label: 'Selected Work', href: '#reality' },
+    { num: '03', label: 'The System', href: '#system' },
+    { num: '04', label: 'Under Pressure', href: '#pressure' },
     { num: '05', label: "What's Next", href: '#next' },
   ];
 
@@ -176,13 +177,13 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
 
             <a
               href={PERSONAL_INFO.cvPdfUrl}
-              download="Kha_Tran_Software_Engineer_CV.pdf"
+              target="_blank" rel="noopener noreferrer"
               className="btn-arch btn-arch-patina nav-resume"
-              aria-label="Download CV (PDF)"
+              aria-label="View CV (PDF, opens in a new tab)"
               style={{ padding: '0.45rem 1rem', fontSize: '0.82rem' }}
             >
-              <Download size={15} />
-              <span>Resume PDF</span>
+              <span>View CV</span>
+              <ArrowUpRight size={15} />
             </a>
 
             <button

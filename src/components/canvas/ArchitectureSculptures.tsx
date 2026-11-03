@@ -170,7 +170,7 @@ export function ArchitectureSculpture({ index, theme, motion, active, reducedMot
   }, [theme, texture]);
   useEffect(() => () => { f.body.dispose(); f.trim.dispose(); f.leds.forEach(material => material.dispose()); f.inset.dispose(); }, [f]);
   useFrame((_, delta) => {
-    if (!active || document.hidden || !root.current?.parent?.visible) return;
+    if (!active || document.hidden || motion.current.selectedNode || !root.current?.parent?.visible) return;
     if (reducedMotion) return;
     time.current += Math.min(delta, 0.05) * 0.25;
     const angle = time.current + motion.current.progress * 2;

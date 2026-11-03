@@ -13,7 +13,7 @@
         // Keep the default theme when browser storage is unavailable.
       }
     </script>
-    <title>Kha Tran | Software Engineer</title>
+    <title>Kha Tran | React, Golang &amp; Offline-First Systems</title>
     
     <!-- SEO Primary Meta Tags -->
     <meta name="title" content="Kha Tran | Software Engineer" />
@@ -21,14 +21,16 @@
     <meta name="keywords" content="Kha Tran, Tran Dinh Kha, Software Engineer, Frontend Developer, Backend Developer, React, TypeScript, Golang, Gin, SQLC, PostgreSQL, Redis, RabbitMQ, MQTT, IoT Edge Gateway, Ho Chi Minh City" />
     <meta name="author" content="Kha Tran" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://khatran1012.github.io/khatran.github.io/" />
+    <link rel="canonical" href="__SITE_URL__" />
 
     <!-- Open Graph / Facebook / LinkedIn -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://khatran1012.github.io/khatran.github.io/" />
-    <meta property="og:title" content="Kha Tran — The Anatomy of Building" />
+    <meta property="og:url" content="__SITE_URL__" />
+    <meta property="og:site_name" content="Kha Tran — Software Engineer" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="Kha Tran — Thoughtful interfaces. Resilient systems." />
     <meta property="og:description" content="Software Engineer crafting resilient digital solutions: responsive React/TypeScript UIs and high-concurrency Golang & IoT edge systems." />
-    <meta property="og:image" content="https://khatran1012.github.io/khatran.github.io/og-preview.png" />
+    <meta property="og:image" content="__SITE_URL__og-preview.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Kha Tran — The Anatomy of Building, an engineering exhibition of interfaces, services and IoT systems" />
@@ -38,20 +40,20 @@
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://khatran1012.github.io/khatran.github.io/" />
-    <meta property="twitter:title" content="Kha Tran — The Anatomy of Building" />
+    <meta property="twitter:url" content="__SITE_URL__" />
+    <meta property="twitter:title" content="Kha Tran — Thoughtful interfaces. Resilient systems." />
     <meta property="twitter:description" content="Software Engineer with passion for user-centered design, robust system engineering, Golang microservices, and IoT edge gateways." />
     <meta property="twitter:image:alt" content="Kha Tran — The Anatomy of Building engineering exhibition" />
-    <meta property="twitter:image" content="https://khatran1012.github.io/khatran.github.io/og-preview.png" />
+    <meta property="twitter:image" content="__SITE_URL__og-preview.png" />
 
     <!-- Favicon & Mobile Icons -->
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="apple-touch-icon" href="./avatar.png" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <link rel="apple-touch-icon" href="%BASE_URL%avatar.png" />
     <meta name="theme-color" content="#167a5b" />
 
     <!-- Local variable fonts avoid an external render-blocking stylesheet. -->
-    <link rel="preload" href="./fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="./fonts/syne-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="%BASE_URL%fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="%BASE_URL%fonts/syne-latin.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- Structured Data (JSON-LD) for Rich Google Search Results -->
     <script type="application/ld+json">
@@ -63,8 +65,8 @@
         "jobTitle": "Software Engineer",
         "email": "mailto:khatran1012@gmail.com",
         "telephone": "+84326004229",
-        "url": "https://khatran1012.github.io/khatran.github.io/",
-        "image": "https://khatran1012.github.io/khatran.github.io/avatar.png",
+        "url": "__SITE_URL__",
+        "image": "__SITE_URL__avatar.png",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Ho Chi Minh City",
@@ -112,6 +114,20 @@
     </script>
   </head>
   <body>
+    <noscript>
+      <style>
+        .journey-track { height: auto !important; min-height: 0 !important; }
+        .journey-stage { position: relative !important; top: auto !important; height: auto !important; }
+        .journey-visual, .journey-toolbar, .journey-tabs, .journey-controls, .journey-footer,
+        .cyber-hotspot-trigger, .cyber-tab-btn, .cyber-action-btn,
+        .career-control-hint, .career-row-state, .career-explore,
+        .career-exhibit-bar, .career-archive-footer, button { display: none !important; }
+        .career-list button { display: flex !important; pointer-events: none; }
+        .journey-body { display: block !important; }
+        .journey-inspector { max-height: none !important; overflow: visible !important; }
+        .hero-copy, .hero-exhibit-column { animation: none !important; }
+      </style>
+    </noscript>
     <a class="skip-link" href="#main-content">Skip to content</a>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

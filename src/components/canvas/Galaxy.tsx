@@ -20,10 +20,10 @@ export function Text({ children, position, color, fontSize }: { children: string
     return map;
   }, [children, color]);
   useEffect(() => () => texture.dispose(), [texture]);
-  return <sprite position={position} scale={[fontSize * 21.33, fontSize * 2.67, 1]}><spriteMaterial map={texture} transparent depthWrite={false} toneMapped={false} /></sprite>;
+  return <sprite position={position} scale={[fontSize * 21.33, fontSize * 2.67, 1]} renderOrder={20}><spriteMaterial map={texture} transparent depthTest={false} depthWrite={false} toneMapped={false} /></sprite>;
 }
 
-export function Galaxy({ theme }: { theme: 'light' | 'dark' }) {
+export function Galaxy({ theme, focused }: { theme: 'light' | 'dark'; focused: boolean }) {
   const geometry = useMemo(() => {
     const positions: number[] = [];
     const colors: number[] = [];
@@ -42,7 +42,7 @@ export function Galaxy({ theme }: { theme: 'light' | 'dark' }) {
   return <group>
     {[0, 1, 2].map(layer => <mesh key={layer} position={[-15 + layer * 18, 10 - layer * 8, -105 + layer * 27]} rotation={[0, 0, -0.38 + layer * 0.2]} renderOrder={-3 + layer}>
       <planeGeometry args={[220 - layer * 45, 120 - layer * 25]} />
-      <shaderMaterial transparent depthWrite={false} uniforms={{ tint: { value: new THREE.Color(theme === 'light' ? ['#787bb8', '#75b3c1', '#a9a0cf'][layer] : ['#403c86', '#145773', '#77509a'][layer]) }, strength: { value: theme === 'light' ? 0.28 : 0.6 } }}
+      <shaderMaterial transparent depthWrite={false} uniforms={{ tint: { value: new THREE.Color(theme === 'light' ? ['#787bb8', '#75b3c1', '#a9a0cf'][layer] : ['#403c86', '#145773', '#77509a'][layer]) }, strength: { value: focused ? 0.08 : theme === 'light' ? 0.28 : 0.6 } }}
         vertexShader={`varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`}
         fragmentShader={`varying vec2 vUv; uniform vec3 tint; uniform float strength;
           float noise(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -52,9 +52,9 @@ export function Galaxy({ theme }: { theme: 'light' | 'dark' }) {
           float fade=1.-smoothstep(.2,1.,length(p)); gl_FragColor=vec4(tint,band*dust*fade*strength);}`}/>
     </mesh>)}
     <points geometry={geometry}>
-      <shaderMaterial transparent depthWrite={false} vertexColors uniforms={{ tint: { value: new THREE.Color(theme === 'light' ? '#334a85' : '#d1e3ff') } }}
+      <shaderMaterial transparent depthWrite={false} vertexColors uniforms={{ tint: { value: new THREE.Color(theme === 'light' ? '#334a85' : '#d1e3ff') }, strength: { value: focused ? 0.2 : 0.85 } }}
         vertexShader={`varying vec3 vColor; void main(){vColor=color; vec4 p=modelViewMatrix*vec4(position,1.); gl_Position=projectionMatrix*p;gl_PointSize=clamp(145./max(1.,-p.z),1.6,4.);}`}
-        fragmentShader={`varying vec3 vColor; uniform vec3 tint; void main(){float d=length(gl_PointCoord-.5);float a=1.-smoothstep(.12,.5,d);gl_FragColor=vec4(tint*vColor,a*.85);}`} />
+        fragmentShader={`varying vec3 vColor; uniform vec3 tint; uniform float strength; void main(){float d=length(gl_PointCoord-.5);float a=1.-smoothstep(.12,.5,d);gl_FragColor=vec4(tint*vColor,a*strength);}`} />
     </points>
   </group>;
 }
@@ -108,7 +108,7 @@ export function LogicSculpture({ theme, motion, reducedMotion, active, onInspect
   }), []);
   useEffect(() => () => paths.forEach(p => p.geometry.dispose()), [paths]);
   useFrame((_, delta) => {
-    if (!active || document.hidden || reducedMotion || !root.current?.parent?.visible) return;
+    if (!active || document.hidden || reducedMotion || motion.current.selectedNode || !root.current?.parent?.visible) return;
     time.current += Math.min(delta, 0.05) * 0.075;
     paths.forEach(({ curve }, i) => {
       const packet = packets.current[i];

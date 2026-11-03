@@ -1,8 +1,10 @@
 import React from 'react';
-import { ArrowDown, Download, Layers, ShieldCheck, Cpu } from 'lucide-react';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import { PERSONAL_INFO } from '../data/cvData';
 import { SculptureCanvas } from './canvas/SculptureCanvas';
 import { CareerArchive } from './CareerArchive/CareerArchive';
+import { EngineeringBento } from './EngineeringBento';
+import { CopyEmailButton } from './CopyEmailButton';
 
 export const OriginHero: React.FC = () => {
   return (
@@ -19,6 +21,7 @@ export const OriginHero: React.FC = () => {
 
             <div className="candidate-identity">
               <p>{PERSONAL_INFO.name}</p>
+              <p className="native-name" lang="vi">{PERSONAL_INFO.fullName}</p>
               <span>Software Engineer</span>
             </div>
 
@@ -26,13 +29,14 @@ export const OriginHero: React.FC = () => {
             <h1
               className="chapter-title"
               style={{
-                fontSize: 'clamp(2.6rem, 5.8vw, 4.4rem)',
-                lineHeight: 1.05,
+                fontSize: 'clamp(2.3rem, 4.4vw, 3.3rem)',
+                lineHeight: 1.08,
+                letterSpacing: '-0.04em',
                 marginBottom: '1rem',
               }}
             >
-              The Anatomy <br />
-              <span className="accent-patina">of Building.</span>
+              Thoughtful interfaces.<br />
+              <span className="accent-patina">Resilient systems.</span>
             </h1>
 
             <div
@@ -45,7 +49,7 @@ export const OriginHero: React.FC = () => {
                 textTransform: 'uppercase',
               }}
             >
-              An Interactive Engineering Exhibition — By {PERSONAL_INFO.name}
+              React / TypeScript · Golang · Offline-first IoT
             </div>
 
             {/* Core Manifesto - Not long clichés, but deep engineering philosophy */}
@@ -61,52 +65,12 @@ export const OriginHero: React.FC = () => {
               }}
             >
               <p style={{ color: 'var(--text-ivory)', fontWeight: 600, marginBottom: '0.5rem' }}>
-                I build interfaces people understand and systems designed for unreliable conditions.
+                I turn complex workflows into clear interfaces and dependable services.
               </p>
               <p>
-                React and TypeScript interfaces, Golang services, and offline-first IoT gateways.
-                Explore the decisions behind the work, from browser state to physical access control.
+                I’m Kha, a software engineer in Ho Chi Minh City. My work spans enterprise
+                frontends, transactional ticketing, and edge gateways that keep working through network interruptions.
               </p>
-            </div>
-
-            {/* Technical Attributes Strip */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                gap: '1rem',
-                marginBottom: '2.5rem',
-              }}
-            >
-              <div className="arch-slab" style={{ padding: '0.85rem 1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--copper-patina)', marginBottom: '0.2rem' }}>
-                  <Layers size={15} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Structure</span>
-                </div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-ivory)' }}>
-                  5 Architecture Slabs
-                </div>
-              </div>
-
-              <div className="arch-slab" style={{ padding: '0.85rem 1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--copper-warm-bright)', marginBottom: '0.2rem' }}>
-                  <ShieldCheck size={15} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Approach</span>
-                </div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-ivory)' }}>
-                  Offline-first Systems
-                </div>
-              </div>
-
-              <div className="arch-slab" style={{ padding: '0.85rem 1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-ivory)', marginBottom: '0.2rem' }}>
-                  <Cpu size={15} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Role</span>
-                </div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-ivory)' }}>
-                  Software Engineer
-                </div>
-              </div>
             </div>
 
             {/* Actions */}
@@ -117,12 +81,13 @@ export const OriginHero: React.FC = () => {
               </a>
               <a
                 href={PERSONAL_INFO.cvPdfUrl}
-                download="Kha_Tran_Software_Engineer_CV.pdf"
+                target="_blank" rel="noopener noreferrer"
                 className="btn-arch btn-arch-outline"
               >
-                <Download size={17} />
-                <span>Download CV (PDF)</span>
+                <span>View CV (PDF)</span>
+                <ArrowUpRight size={17} />
               </a>
+              <CopyEmailButton />
             </div>
           </div>
 
@@ -131,6 +96,7 @@ export const OriginHero: React.FC = () => {
             <SculptureCanvas />
           </div>
         </div>
+        <EngineeringBento />
         <CareerArchive />
       </div>
     </section>

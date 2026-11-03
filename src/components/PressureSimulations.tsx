@@ -204,15 +204,15 @@ export const PressureSimulations: React.FC = () => {
         <div style={{ marginBottom: '3.5rem' }}>
           <div className="chapter-badge warm">
             <Zap size={13} />
-            <span>CHAPTER 03 // DECISIONS UNDER PRESSURE</span>
+            <span>CHAPTER 04 // DECISIONS UNDER PRESSURE</span>
           </div>
           <h2 className="chapter-title">
-            Engineering Under <span className="accent-copper">Contention.</span>
+            When requests race.<br /><span className="accent-copper">When networks fail.</span>
           </h2>
           <p className="chapter-desc">
-            Seniority is not demonstrated by listing library names—it is revealed in how you reason
-            about concurrency, race conditions, edge failures, and physical world constraints.
-            Run real asynchronous mock requests, then explore conceptual lock and offline scenarios. These browser demos do not connect to production services or physical hardware.
+            See how I approach stale search results, competing ticket scans, and a disconnected gate.
+            Try the browser demos, then read the engineering choices behind each one.
+            These examples use simulated events and do not connect to production services or physical hardware.
           </p>
         </div>
 

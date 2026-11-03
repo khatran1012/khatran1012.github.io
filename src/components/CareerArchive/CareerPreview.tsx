@@ -23,7 +23,7 @@ interface PreviewProps {
 }
 
 export function CareerPreview({ exhibit, engineering, enabled, visible, expanded, reduced }: PreviewProps) {
-  const [small, setSmall] = useState(() => matchMedia('(max-width: 600px)').matches);
+  const [small, setSmall] = useState(false);
   const image = engineering ? exhibit.diagram : small ? exhibit.thumbnail : exhibit.image;
   const target = useRef(image);
   target.current = image;
@@ -43,6 +43,7 @@ export function CareerPreview({ exhibit, engineering, enabled, visible, expanded
   useEffect(() => {
     const query = matchMedia('(max-width: 600px)');
     const update = () => setSmall(query.matches);
+    update();
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);
   }, []);
@@ -70,6 +71,7 @@ export function CareerPreview({ exhibit, engineering, enabled, visible, expanded
       <motion.div className="career-image-plane" style={{ rotateX, rotateY, transformPerspective: 1100 }}
         data-shader={failed ? 'fallback' : ready ? 'ready' : 'poster'} data-displayed-artwork={ready ? displayed : poster ?? ''}>
         <AnimatePresence initial={false}>
+          {!poster && <img src={exhibit.thumbnail} alt={exhibit.artifact} width={1120} height={840} loading="lazy" decoding="async" />}
           {poster && <motion.img key={poster} src={poster} alt={engineering ? exhibit.engineering : exhibit.artifact} width={1120} height={840} decoding="async"
             initial={{ opacity: reduced ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : 0.35 }} />}
         </AnimatePresence>

@@ -8,20 +8,27 @@ import { WhatsNext } from './components/WhatsNext';
 import { ExhibitionFooter } from './components/ExhibitionFooter';
 
 export const App: React.FC = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
-  });
+  // The first client render must match the generated HTML in either theme.
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [themeReady, setThemeReady] = useState(false);
 
   useEffect(() => {
+    setTheme(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
+    setThemeReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!themeReady) return;
     document.documentElement.setAttribute('data-theme', theme);
     try {
       localStorage.setItem('kt-exhibition-theme', theme);
     } catch {
       // Theme switching still works when browser storage is unavailable.
     }
-  }, [theme]);
+  }, [theme, themeReady]);
 
   useEffect(() => {
+    if (!('IntersectionObserver' in window)) return;
     const sections = document.querySelectorAll('main > section, .cyber-exhibit');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => entry.target.classList.toggle('is-offscreen', !entry.isIntersecting));
@@ -43,7 +50,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (!('IntersectionObserver' in window)) return;
     const blocks = document.querySelectorAll<HTMLElement>(
-      '#main-content > section:not(#origin) > .container > :not(.artifacts-grid):not(.journey-track):not(dialog), .artifacts-grid > .arch-slab, .career-snapshot',
+      '#main-content > section:not(#origin) > .container > :not(.artifacts-grid):not(.journey-track):not(dialog), .artifacts-grid > .arch-slab, .expertise-bento > .arch-slab, .career-snapshot',
     );
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -76,14 +83,14 @@ export const App: React.FC = () => {
         {/* Chapter 01 — The Origin */}
         <OriginHero />
 
-        {/* Chapter 02 — Inside the System */}
+        {/* Chapter 02 — Selected Work */}
+        <BuiltInReality />
+
+        {/* Chapter 03 — Inside the System */}
         <SystemAnatomy theme={theme} />
 
-        {/* Chapter 03 — Decisions Under Pressure */}
+        {/* Chapter 04 — Decisions Under Pressure */}
         <PressureSimulations />
-
-        {/* Chapter 04 — Built in Reality */}
-        <BuiltInReality />
 
         {/* Chapter 05 — What's Next? */}
         <WhatsNext />

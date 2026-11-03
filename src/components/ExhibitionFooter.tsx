@@ -54,8 +54,8 @@ export const ExhibitionFooter: React.FC = () => {
               Curated by {PERSONAL_INFO.name} • Software Engineer
             </div>
             <p style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              An interactive engineering exhibition showcasing the deterministic anatomy of software,
-              from high-concurrency microservices to offline-first edge gateways.
+              Software built around real constraints: clear interfaces, reliable services,
+              and gateways that keep working through network interruptions.
             </p>
           </div>
 
@@ -160,7 +160,7 @@ export const ExhibitionFooter: React.FC = () => {
             gap: '1rem',
           }}
         >
-          <div>© {new Date().getFullYear()} Kha Tran (Trần Đình Kha). All exhibition rights reserved.</div>
+          <div>© {import.meta.env.VITE_BUILD_YEAR} Kha Tran (<span lang="vi">Trần Đình Kha</span>). All exhibition rights reserved.</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Shield size={13} color="var(--copper-patina)" />
             <span>Built with React, TypeScript, R3F, Motion &amp; Vite</span>

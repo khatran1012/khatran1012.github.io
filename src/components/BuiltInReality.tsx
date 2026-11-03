@@ -8,12 +8,17 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import { PROJECTS, Project } from '../data/cvData';
+import { ProjectPreview } from './ProjectPreview';
 
 export const BuiltInReality: React.FC = () => {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(() => {
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [locationReady, setLocationReady] = useState(false);
+
+  useEffect(() => {
     const projectId = new URLSearchParams(window.location.search).get('case');
-    return PROJECTS.find((project) => project.featured && project.id === projectId) || null;
-  });
+    setSelectedProject(PROJECTS.find((project) => project.featured && project.id === projectId) || null);
+    setLocationReady(true);
+  }, []);
 
   const caseStudyRef = useRef<HTMLDialogElement>(null);
   const restorePage = useRef<(() => void) | null>(null);
@@ -25,6 +30,7 @@ export const BuiltInReality: React.FC = () => {
   useEffect(() => () => { restorePage.current?.(); }, []);
 
   useEffect(() => {
+    if (!locationReady) return;
     const url = new URL(window.location.href);
     if (selectedProject) url.searchParams.set('case', selectedProject.id);
     else url.searchParams.delete('case');
@@ -43,7 +49,7 @@ export const BuiltInReality: React.FC = () => {
     };
     dialog.showModal();
     document.body.style.overflow = 'hidden';
-  }, [selectedProject]);
+  }, [selectedProject, locationReady]);
 
   // Exhibition narrative data matching Kha Tran's exact projects
   const EXHIBITION_STORIES: Record<
@@ -58,37 +64,37 @@ export const BuiltInReality: React.FC = () => {
   > = {
     'theme-park-iot': {
       problem:
-        'Amusement park entry gates experience thousands of simultaneous barcode scans during peak rush hours. Central server network interruptions risked paralyzing physical turnstiles, while concurrent online & offline ticket redemptions risked catastrophic double-entry fraud.',
+        'Ticket orders, shared inventory, and physical gate scans must stay consistent under concurrent use. Entry gates also need local operation when the central network is unavailable.',
       architecture:
         'Hybrid Golang microservices (Gin, SQLC, PostgreSQL) combined with an autonomous on-premise Linux Edge Gateway. MQTT broker manages bidirectional telemetry. Redis distributed mutexes and PostgreSQL row-level locks (SELECT FOR UPDATE) serialize validations.',
       ownership:
         'My implementation scope: Golang backend services, edge caching and synchronization, and OTA-facing API endpoints. The architecture above describes the wider platform; delivery also involved frontend, infrastructure, and product teammates.',
       tradeoffs:
-        'Chose local HMAC-signed ticket verification on the edge gateway with Write-Ahead-Log (WAL) replay over blocking cloud verification. Designed for local admission during WAN loss, accepting delayed reconciliation. Independent offline gateways require ticket partitioning or coordination to prevent duplicate admission.',
+        'Local caching supports gate operation during network loss, with delayed synchronization after reconnection. Database transactions and locks protect central state, while disconnected gateways still need a clear reconciliation and duplicate-admission policy.',
       results:
         'Implemented offline validation and deferred synchronization. Production uptime, gate latency, and cross-gateway duplicate rates are not benchmarked in this portfolio.',
     },
     'marina-bay-sands': {
       problem:
-        'International tourists accessing ticket sales on high-latency mobile networks suffered high bounce rates. The platform needed instant first-paint times, global accessibility, and seamless transaction handoffs.',
+        'Attraction discovery, cart state, authentication, and payment needed to work together across desktop and mobile ticket-purchasing journeys.',
       architecture:
-        'Next.js SSR/SSG coupled with React Native Web Progressive Web App (PWA) architecture. Redux centralized state store with deterministic optimistic cart updates and secure multi-currency payment gateway integrations.',
+        'React and Next.js interfaces with SSR/SSG, Redux state, REST and payment integrations, and React Native Web PWA work across web and mobile experiences.',
       ownership:
         'Developed end-to-end e-commerce purchasing flows, worked on rendering performance and technical SEO, and integrated localized payment gateways.',
       tradeoffs:
-        'Maintained hybrid SSR/SSG rendering rather than full client-side SPA to guarantee SEO crawlability across global search engines while maintaining rich dynamic cart reactivity.',
+        'SSR/SSG makes public content available in the initial response, while client-side state handles carts and other interactive workflows. Rendering choices still need to account for content freshness and integration behavior.',
       results:
         'Delivered purchasing interfaces across desktop and mobile. No public LCP or conversion benchmark is included here.',
     },
     'techcombank-portal': {
       problem:
-        'Serving millions of banking customers across Vietnam requires accessible interactions, stable layouts, and a unified enterprise CMS system enabling non-technical content authors to deploy dynamic banking products rapidly.',
+        'Banking content authors needed reusable page modules, a consistent authoring structure, accessible interactions, and organized digital assets within Adobe Experience Manager.',
       architecture:
         'Adobe Experience Manager (AEM) modular architecture. Custom component framework using Vanilla JavaScript to bypass heavy client-side runtime overhead.',
       ownership:
         'Customized and maintained modular AEM components, improved accessibility against WCAG guidance, and managed enterprise digital financial asset pipelines.',
       tradeoffs:
-        'Deliberately avoided heavy client-side frameworks in favor of ultra-lean Vanilla JavaScript modules within AEM to guarantee maximum cross-device compatibility for elderly and low-spec banking users.',
+        'Reusable AEM components fit the existing authoring workflow. Lightweight JavaScript keeps component behavior focused, while shared templates require coordination between content authors, designers, and developers.',
       results:
         'Delivered reusable banking content components and accessibility improvements. Formal WCAG certification and publishing-time measurements are not provided here.',
     },
@@ -96,11 +102,11 @@ export const BuiltInReality: React.FC = () => {
       problem:
         'Needed an innovative, interactive 3D corporate showcase to present Vietnam’s cultural and technological landscape without requiring heavy app store downloads.',
       architecture:
-        'Browser-based Three.js WebGL canvas combined with React and Tailwind CSS. Procedural 3D camera transitions and compressed GLTF texture streaming.',
+        'JavaScript and Three.js for the 3D/360° experience, alongside reusable React and Tailwind CSS modules for corporate web content.',
       ownership:
-        'Developed the 3D/360° interactive spatial environment using Three.js, optimized GPU draw calls for mobile execution, and integrated seamless audio-visual cues.',
+        'Developed the Three.js 3D/360° experience, built and maintained frontend modules, and collaborated with backend, product, and marketing teams on delivery and technical SEO.',
       tradeoffs:
-        'Employed low-poly geometric assets with baked ambient occlusion maps instead of real-time multi-light raymarching to reduce rendering cost on mobile devices.',
+        'Browser-based 3D avoids an app-install step but adds graphics and asset costs. Interaction detail needs to be balanced with readable page content and the devices visitors use.',
       results:
         'Delivered a browser-based interactive showcase. Device-specific FPS measurements are not included here.',
     },
@@ -113,31 +119,30 @@ export const BuiltInReality: React.FC = () => {
         <div style={{ marginBottom: '3rem' }}>
           <div className="chapter-badge">
             <Building2 size={13} />
-            <span>CHAPTER 04 // BUILT IN REALITY</span>
+            <span>CHAPTER 02 // BUILT IN REALITY</span>
           </div>
           <h2 className="chapter-title">
-            Engineered <span className="accent-patina">Artifacts.</span>
+            Selected work.<br /><span className="accent-patina">Real-world constraints.</span>
           </h2>
           <p className="chapter-desc">
-            A portfolio of systems delivered under real constraints. Each artifact is presented
-            with its core architectural problem, ownership boundaries, technical trade-offs, and
-            implementation outcomes. Performance and compliance claims require separate measurement.
+            Four projects across interfaces, services, and the physical edge.
+            The problem, my contribution, and what shipped—followed by the decisions behind it.
           </p>
         </div>
 
-        {/* 4-Block Exhibition Projects Grid (All 4 on One Row on Desktop) */}
+        {/* Four case studies with room for readable summaries. */}
         <div className="artifacts-grid">
           {PROJECTS.filter((p) => p.featured).map((project, idx) => {
             const story = EXHIBITION_STORIES[project.id] || {
               problem: project.description,
               architecture: project.technologies.join(', '),
               ownership: project.highlights[0] || '',
-              tradeoffs: 'Optimized for high-performance delivery and reliability.',
-              results: 'Successfully deployed to production with robust uptime.',
+              tradeoffs: 'See the project details for implementation context.',
+              results: project.highlights[0] || project.description,
             };
 
             return (
-              <div
+              <article
                 key={project.id}
                 className="arch-slab"
                 style={{
@@ -149,6 +154,7 @@ export const BuiltInReality: React.FC = () => {
                 }}
               >
                 <div>
+                  <ProjectPreview project={project} />
                   {/* Top Metadata */}
                   <div
                     style={{
@@ -203,59 +209,11 @@ export const BuiltInReality: React.FC = () => {
                     {project.subtitle}
                   </div>
 
-                  {/* Core Problem Callout */}
-                  <div
-                    style={{
-                      background: 'var(--bg-canvas)',
-                      border: '1px solid var(--border-arch)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '0.85rem',
-                      marginBottom: '1rem',
-                      fontSize: '0.82rem',
-                      color: 'var(--text-secondary)',
-                      lineHeight: 1.5,
-                      minHeight: '85px',
-                    }}
-                  >
-                    <strong
-                      style={{
-                        display: 'block',
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.68rem',
-                        color: 'var(--copper-patina)',
-                        textTransform: 'uppercase',
-                        marginBottom: '0.2rem',
-                      }}
-                    >
-                      Problem Anatomy:
-                    </strong>
-                    {story.problem.length > 130 ? `${story.problem.slice(0, 130)}...` : story.problem}
-                  </div>
-
-                  {/* Measured Outcome */}
-                  <div
-                    style={{
-                      borderLeft: '2px solid var(--copper-patina)',
-                      paddingLeft: '0.75rem',
-                      marginBottom: '1.1rem',
-                      fontSize: '0.8rem',
-                      color: 'var(--text-ivory)',
-                      minHeight: '62px',
-                    }}
-                  >
-                    <strong
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.66rem',
-                        color: 'var(--copper-patina)',
-                        textTransform: 'uppercase',
-                        display: 'block',
-                      }}
-                    >
-                      Measured Outcome:
-                    </strong>
-                    {story.results.length > 105 ? `${story.results.slice(0, 105)}...` : story.results}
-                  </div>
+                  <dl className="project-par">
+                    <div><dt>01 / Problem</dt><dd>{project.caseSummary?.problem || story.problem}</dd></div>
+                    <div><dt>02 / Solution</dt><dd>{project.caseSummary?.action || story.ownership}</dd></div>
+                    <div><dt>03 / Outcome &amp; Evidence</dt><dd>{project.caseSummary?.result || story.results}</dd></div>
+                  </dl>
 
                   {/* Tech Stack Pills */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '1.25rem' }}>
@@ -279,9 +237,10 @@ export const BuiltInReality: React.FC = () => {
                     className="btn-arch btn-arch-outline"
                     style={{ flex: 1, padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
                   >
-                    <span>Inspect Case</span>
+                    <span>Read case study</span>
                     <ArrowUpRight size={14} />
                   </button>
+                  {project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer" className="btn-arch btn-arch-outline" style={{ fontSize: '0.8rem', padding: '0.5rem 0.75rem' }}>Source code</a>}
                   {project.domain && (
                     <a
                       href={project.domain}
@@ -289,17 +248,17 @@ export const BuiltInReality: React.FC = () => {
                       rel="noopener noreferrer"
                       className="btn-arch btn-arch-outline"
                       style={{ padding: '0.5rem 0.65rem' }}
-                      title="Visit Live Domain"
-                      aria-label="Visit Live Domain"
+                      title="Visit project website (opens in a new tab)"
                     >
-                      <ExternalLink size={14} />
+                      <span>Website</span><ExternalLink size={14} />
                     </a>
                   )}
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
+        <p className="project-privacy-note">Illustrations describe the engineering context. Public websites are linked where available; client source code and internal demos are not published here.</p>
 
         {/* Interactive Case Study Modal */}
         <AnimatePresence onExitComplete={finishClose}>
@@ -387,6 +346,11 @@ export const BuiltInReality: React.FC = () => {
                   </button>
                 </div>
 
+                <div className="case-study-visual">
+                  <ProjectPreview project={selectedProject} />
+                  <p>Illustrative engineering context. My delivery scope is described in “My Role” below.</p>
+                </div>
+
                 {/* Narrative Sections */}
                 {(() => {
                   const s = EXHIBITION_STORIES[selectedProject.id];
@@ -395,35 +359,35 @@ export const BuiltInReality: React.FC = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
                       <div style={{ padding: '1.25rem', background: 'var(--bg-canvas)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-arch)' }}>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.74rem', color: 'var(--copper-patina)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
-                          01 // Architectural Challenge
+                          01 // Problem
                         </div>
                         <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{s.problem}</p>
                       </div>
 
                       <div style={{ padding: '1.25rem', background: 'var(--bg-canvas)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-arch)' }}>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.74rem', color: 'var(--copper-warm-bright)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
-                          02 // System Architecture Blueprint
-                        </div>
-                        <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{s.architecture}</p>
-                      </div>
-
-                      <div style={{ padding: '1.25rem', background: 'var(--bg-canvas)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-arch)' }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.74rem', color: 'var(--copper-patina)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
-                          03 // My Ownership &amp; Code Responsibility
+                          02 // My Role
                         </div>
                         <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{s.ownership}</p>
                       </div>
 
+                      <div style={{ padding: '1.25rem', background: 'var(--bg-canvas)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-arch)' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.74rem', color: 'var(--copper-patina)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                          03 // Solution
+                        </div>
+                        <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{s.architecture}</p>
+                      </div>
+
                       <div style={{ padding: '1.25rem', background: 'var(--copper-warm-subtle)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--copper-warm-border)' }}>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.74rem', color: 'var(--copper-warm-bright)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
-                          04 // Technical Trade-Offs &amp; Decision
+                          04 // Trade-offs
                         </div>
                         <p style={{ fontSize: '0.92rem', color: 'var(--text-ivory)', lineHeight: 1.6 }}>{s.tradeoffs}</p>
                       </div>
 
                       <div style={{ padding: '1.25rem', background: 'var(--copper-patina-subtle)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--copper-patina-border)' }}>
                         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.74rem', color: 'var(--copper-patina)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.4rem' }}>
-                          05 // Outcomes &amp; Evidence
+                          05 // Outcome &amp; Evidence
                         </div>
                         <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-ivory)', lineHeight: 1.6 }}>{s.results}</p>
                       </div>
@@ -434,7 +398,7 @@ export const BuiltInReality: React.FC = () => {
                 {/* Technologies List */}
                 <div style={{ marginBottom: '2rem' }}>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                    Full Technology Envelope:
+                    Technologies used:
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                     {selectedProject.technologies.map((t) => (

@@ -10,6 +10,10 @@ export interface Project {
   highlights: string[];
   technologies: string[];
   featured?: boolean;
+  previewImage?: string;
+  previewVideo?: string;
+  sourceUrl?: string;
+  caseSummary?: { problem: string; action: string; result: string };
 }
 
 export interface Experience {
@@ -180,7 +184,7 @@ export const PERSONAL_INFO = {
   phone: '0326004229',
   displayPhone: '+84 326 004 229',
   location: 'Ho Chi Minh City, Vietnam',
-  website: 'https://khatran1012.github.io/khatran.github.io/',
+  website: import.meta.env.VITE_SITE_URL,
   linkedin: 'https://www.linkedin.com/in/khatran1012/',
   github: 'https://github.com/khatran1012',
   avatarUrl: './avatar.png',
@@ -336,12 +340,18 @@ export const EXPERIENCES: Experience[] = [
 export const PROJECTS: Project[] = [
   {
     id: 'theme-park-iot',
-    title: 'Theme Park Management & IoT Access Control Ecosystem',
+    title: 'Theme Park & IoT Access',
     subtitle: 'High-Concurrency Distributed Ticketing Platform',
     category: 'iot',
     company: 'Techera',
     period: '04/2026 - Present',
     featured: true,
+    previewImage: 'career/techera-engineering.svg',
+    caseSummary: {
+      problem: 'Keep ticket inventory consistent and entry gates useful when the central connection drops.',
+      action: 'Built Golang services, PostgreSQL transactions, and locally cached MQTT edge gateways.',
+      result: 'Delivered offline ticket validation, deferred synchronization, and OTA integration endpoints.',
+    },
     description:
       'A distributed enterprise ticketing and access control platform designed for high-concurrency theme parks and entertainment attractions. The ecosystem integrates a central management backend, an edge IoT gateway for on-premise hardware control (turnstiles/scanners), and two modern web portals (Operations Admin and B2B/OTA Partner Portal).',
     highlights: [
@@ -355,12 +365,18 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'marina-bay-sands',
-    title: 'Ticket Sales Website and Landing Page',
+    title: 'Marina Bay Sands Ticketing',
     subtitle: 'Marina Bay Sands Singapore Park & Attraction Sales',
     category: 'frontend',
     company: 'Vertis Digital Singapore',
     period: 'Freelance / Contract',
     featured: true,
+    previewImage: 'career/enterprise-engineering.svg',
+    caseSummary: {
+      problem: 'Connect attraction discovery, shopping carts, and payment across desktop and mobile.',
+      action: 'Built React / Next.js purchasing flows with Redux state, API integrations, and SSR/SSG.',
+      result: 'Delivered responsive purchasing interfaces and integrated payment workflows.',
+    },
     description:
       'Developed ticket sales website and park introduction pages for Marina Bay Sands in Singapore, built for high performance, mobile responsiveness, and seamless transaction flows.',
     highlights: [
@@ -383,6 +399,12 @@ export const PROJECTS: Project[] = [
     domain: 'https://techcombank.com/',
     period: 'Contract',
     featured: true,
+    previewImage: 'career/sutrix-engineering.svg',
+    caseSummary: {
+      problem: 'Help content authors maintain consistent, accessible banking pages in an enterprise CMS.',
+      action: 'Built reusable AEM modules with Vanilla JavaScript and maintained SEO and accessibility.',
+      result: 'Delivered reusable banking components and a shared structure for digital content.',
+    },
     description:
       'Page introducing TECHCOMBANK banking information, serving millions of banking customers across Vietnam.',
     highlights: [
@@ -412,13 +434,19 @@ export const PROJECTS: Project[] = [
   },
   {
     id: 'nashtech-virtual-vietnam',
-    title: 'NashTech Global & Virtual Vietnam 3D Experience',
+    title: 'Virtual Vietnam & NashTech',
     subtitle: 'Interactive 3D/360° Corporate Web Showcase',
     category: 'frontend',
     company: 'NashTech VN',
     domain: 'https://www.nashtechglobal.com',
     period: 'NashTech VN',
     featured: true,
+    previewImage: 'career/nashtech-engineering.svg',
+    caseSummary: {
+      problem: 'Bring a 3D / 360° showcase into the browser alongside corporate web content.',
+      action: 'Developed Three.js interactions and reusable React interfaces with cross-functional teams.',
+      result: 'Delivered an interactive web showcase and maintained corporate frontend modules.',
+    },
     description:
       'Corporate landing pages for NashTech Global and an interactive 3D/360° virtual web experience showcasing Vietnam attractions.',
     highlights: [

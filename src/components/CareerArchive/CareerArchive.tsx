@@ -20,11 +20,11 @@ export function CareerArchive() {
   const [enabled, setEnabled] = useState(false);
   const [near, setNear] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [hidden, setHidden] = useState(document.hidden);
-  const [finePointer, setFinePointer] = useState(() => matchMedia('(hover: hover) and (pointer: fine)').matches);
+  const [hidden, setHidden] = useState(false);
+  const [finePointer, setFinePointer] = useState(false);
   const [detail, setDetail] = useState<number | null>(null);
   const [detailImage, setDetailImage] = useState('');
-  const [reduced, setReduced] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [reduced, setReduced] = useState(true);
   const currentIndex = previewed ?? selected;
   const exhibit = CAREER_ARCHIVE[currentIndex];
   const engineering = view === 'engineering';
@@ -35,6 +35,7 @@ export function CareerArchive() {
     const updatePreference = () => setReduced(preference.matches);
     const updatePointer = () => { setFinePointer(pointer.matches); setPreviewed(null); };
     const updateVisibility = () => setHidden(document.hidden);
+    updatePreference(); updatePointer(); updateVisibility();
     const observer = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) setNear(true); }, { rootMargin: '160px' });
     const viewport = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
     if (section.current) { observer.observe(section.current); viewport.observe(section.current); }
