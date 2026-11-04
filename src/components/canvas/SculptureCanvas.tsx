@@ -113,11 +113,24 @@ const MODULE_SIZES = {
   other: '(min-width: 1520px) 135px, (min-width: 1280px) 10vw, (min-width: 760px) calc(22vw - 68px), (min-width: 601px) 22vw, 32vw',
 };
 
+const SIGNAL_CHARGE_MS = 100;
+const SIGNAL_FLIGHT_MS = 560;
+
+interface SelectionRoute {
+  nodeId: string;
+  run: number;
+  path: string;
+  x: number;
+  y: number;
+  endX: number;
+  endY: number;
+}
+
 export const SculptureCanvas: React.FC = () => {
-  const [selection, setSelection] = useState<{ nodeId: string; run: number; arrived: boolean } | null>(null);
+  const [selection, setSelection] = useState<{ nodeId: string; run: number; arrived: boolean; animate: boolean } | null>(null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [neonActive, setNeonActive] = useState(true);
-  const [signalPath, setSignalPath] = useState('');
+  const [route, setRoute] = useState<SelectionRoute | null>(null);
   const exhibitRef = useRef<HTMLDivElement>(null);
   const dockRef = useRef<HTMLSpanElement>(null);
   const depthRef = useRef<HTMLDivElement>(null);
@@ -126,6 +139,7 @@ export const SculptureCanvas: React.FC = () => {
   const activeNodeId = selection?.nodeId ?? null;
   const litNodeId = highlightedId ?? activeNodeId;
   const selectedNode = SYSTEM_NODES.find(node => node.id === activeNodeId);
+  const activeRoute = route?.nodeId === selection?.nodeId && route?.run === selection?.run ? route : null;
 
   useEffect(() => {
     const exhibit = exhibitRef.current;
@@ -133,12 +147,12 @@ export const SculptureCanvas: React.FC = () => {
     const dock = dockRef.current;
     const source = exhibit?.querySelector<HTMLButtonElement>(`[data-node="${selection?.nodeId}"]`);
     if (!exhibit || !viewport || !dock || !source) {
-      setSignalPath('');
+      setRoute(null);
       return;
     }
     const measure = () => {
       const bounds = exhibit.getBoundingClientRect();
-      const origin = source.getBoundingClientRect();
+      const origin = (source.querySelector('.cyber-module-socket') ?? source).getBoundingClientRect();
       const stage = viewport.getBoundingClientRect();
       exhibit.style.setProperty('--hero-stage-top', `${stage.top - bounds.top}px`);
       exhibit.style.setProperty('--hero-stage-height', `${stage.height}px`);
@@ -147,8 +161,9 @@ export const SculptureCanvas: React.FC = () => {
       const y = origin.top + origin.height / 2 - bounds.top;
       const endX = destination.left + destination.width / 2 - bounds.left;
       const endY = destination.top + destination.height / 2 - bounds.top;
-      const bend = (endX - x) * 0.45;
-      setSignalPath(`M ${x.toFixed(1)} ${y.toFixed(1)} C ${(x + bend).toFixed(1)} ${y.toFixed(1)} ${(endX - bend).toFixed(1)} ${endY.toFixed(1)} ${endX.toFixed(1)} ${endY.toFixed(1)}`);
+      const bend = Math.max(45, Math.abs(endX - x) * 0.42);
+      setRoute({ nodeId: selection!.nodeId, run: selection!.run, x, y, endX, endY,
+        path: `M ${x.toFixed(1)} ${y.toFixed(1)} C ${(x + bend).toFixed(1)} ${y.toFixed(1)} ${(endX - bend).toFixed(1)} ${endY.toFixed(1)} ${endX.toFixed(1)} ${endY.toFixed(1)}` });
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -162,17 +177,28 @@ export const SculptureCanvas: React.FC = () => {
   useEffect(() => {
     const preference = matchMedia('(prefers-reduced-motion: reduce)');
     const finish = () => {
-      if (preference.matches) setSelection(current => current ? { ...current, arrived: true } : null);
+      if (preference.matches) setSelection(current => current ? { ...current, arrived: true, animate: false } : null);
     };
     preference.addEventListener('change', finish);
     return () => preference.removeEventListener('change', finish);
   }, []);
 
-  const selectNode = (nodeId: string) => setSelection(current => ({
-    nodeId,
-    run: (current?.run ?? 0) + 1,
-    arrived: !neonActive || matchMedia('(prefers-reduced-motion: reduce)').matches,
-  }));
+  // Keep the information available even if a decorative animation is interrupted.
+  useEffect(() => {
+    if (!selection || selection.arrived) return;
+    const { nodeId, run } = selection;
+    const fallback = window.setTimeout(() => {
+      setSelection(current => current?.nodeId === nodeId && current.run === run
+        ? { ...current, arrived: true } : current);
+    }, SIGNAL_CHARGE_MS + SIGNAL_FLIGHT_MS + 350);
+    return () => window.clearTimeout(fallback);
+  }, [selection]);
+
+  const selectNode = (nodeId: string) => {
+    updateDepth(0, 0);
+    const animate = neonActive && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setSelection(current => ({ nodeId, run: (current?.run ?? 0) + 1, arrived: !animate, animate }));
+  };
 
   const updateDepth = (x: number, y: number) => {
     pointer.current = { x, y };
@@ -191,7 +217,9 @@ export const SculptureCanvas: React.FC = () => {
   };
 
   return (
-    <div ref={exhibitRef} className={`cyber-exhibit ${neonActive ? '' : 'neon-paused'} ${selection && !selection.arrived ? 'is-routing' : ''}`} onKeyDown={event => {
+    <div ref={exhibitRef} className={`cyber-exhibit ${neonActive ? '' : 'neon-paused'} ${selection && !selection.arrived ? 'is-routing' : ''}`}
+      data-selected={Boolean(selection)} data-animate={selection?.animate ?? false}
+      style={{ '--signal-charge': `${SIGNAL_CHARGE_MS}ms`, '--signal-flight': `${SIGNAL_FLIGHT_MS}ms` } as React.CSSProperties} onKeyDown={event => {
       if (event.key === 'Escape') resetView();
     }}>
       <div className="cyber-core-viewer" role="region" aria-label="Interactive System Architecture Exhibit">
@@ -215,10 +243,10 @@ export const SculptureCanvas: React.FC = () => {
         </div>
 
         <div ref={depthRef} className="cyber-core-viewport" onPointerMove={event => {
-          if (event.pointerType !== 'mouse' || selection && !selection.arrived || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          if (event.pointerType !== 'mouse' || selection || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
           const bounds = event.currentTarget.getBoundingClientRect();
           updateDepth((event.clientX - bounds.left) / bounds.width * 2 - 1, (event.clientY - bounds.top) / bounds.height * 2 - 1);
-        }} onPointerLeave={() => { if (!selection || selection.arrived) updateDepth(0, 0); }}>
+        }} onPointerLeave={() => { if (!selection) updateDepth(0, 0); }}>
           <NanoCircuitBackdrop />
           <div className="cyber-depth-rig">
             <svg className="cyber-module-connections" viewBox="0 0 1000 760" preserveAspectRatio="none" aria-hidden="true">
@@ -271,7 +299,7 @@ export const SculptureCanvas: React.FC = () => {
           <div className="cyber-footer-actions">
             <button type="button" className={`cyber-action-btn ${neonActive ? 'active' : ''}`}
               onClick={() => {
-                if (neonActive) setSelection(current => current ? { ...current, arrived: true } : null);
+                if (neonActive) setSelection(current => current ? { ...current, arrived: true, animate: false } : null);
                 setNeonActive(value => !value);
               }} aria-pressed={neonActive}>
               <Zap size={14} /><span>{neonActive ? 'LED Neon: ON' : 'LED Neon: OFF'}</span>
@@ -284,7 +312,7 @@ export const SculptureCanvas: React.FC = () => {
       </div>
       <aside className="cyber-module-inspector" aria-label="Module information" data-open={Boolean(selection?.arrived)}
         style={{ '--module-color': selectedNode?.hexColor ?? '#38efd8' } as React.CSSProperties}>
-        <span ref={dockRef} className="cyber-inspector-port" aria-hidden="true" />
+        <span key={selection?.run} ref={dockRef} className="cyber-inspector-port" aria-hidden="true"><span /></span>
           <div id="hero-module-detail" className="cyber-footer-readout" aria-live="polite" aria-atomic="true"
             aria-busy={selection !== null && !selection.arrived}>
             {SYSTEM_NODES.filter(node => node.id === activeNodeId).map(node => (
@@ -292,6 +320,7 @@ export const SculptureCanvas: React.FC = () => {
                 aria-hidden={!selection?.arrived}
                 style={{ '--module-color': node.hexColor } as React.CSSProperties}>
                 <button type="button" className="cyber-inspector-close" onClick={resetView} aria-label="Close module information"><X size={16} /></button>
+                <div className="cyber-readout-connection" aria-hidden="true"><span>MODULE / {node.number}</span><span><i />LINK ESTABLISHED</span></div>
                 <span className="cyber-readout-eyebrow">{node.category}</span>
                 <div className="cyber-readout-head">
                   <span className={`cyber-readout-pill ${node.color}`}>{node.number} // {node.name}</span>
@@ -305,7 +334,7 @@ export const SculptureCanvas: React.FC = () => {
                 <a href={node.targetChapter} className="cyber-readout-link">Inspect in Exhibit <ExternalLink size={12} /></a>
               </div>
             ))}
-            {selectedNode && !selection?.arrived && <p className="cyber-link-pending">Connecting to {selectedNode.name}…</p>}
+            {selectedNode && !selection?.arrived && <p className="cyber-link-pending"><span aria-hidden="true" />Connecting to {selectedNode.name}…</p>}
             {activeNodeId === null && <div className="cyber-default-readout">
               <span className="cyber-readout-eyebrow">KT / ARCHITECTURE EXHIBIT</span>
               <strong>One machine. Five connected disciplines.</strong>
@@ -314,20 +343,22 @@ export const SculptureCanvas: React.FC = () => {
             </div>}
           </div>
       </aside>
-      {selectedNode && selection && signalPath && <React.Fragment key={`${selectedNode.id}:${selection.run}`}>
+      {selectedNode && selection && activeRoute && <React.Fragment key={`${selectedNode.id}:${selection.run}`}>
         <svg className={`cyber-selection-route ${selection.arrived ? 'is-complete' : ''}`} aria-hidden="true">
           <g className="cyber-connection cyber-selection-signal" data-signal-node={selectedNode.id} style={{ color: selectedNode.hexColor }}>
-            <path d={signalPath} strokeWidth="1" opacity="0.15" />
-            <path d={signalPath} pathLength="1" className="cyber-selection-draw" strokeWidth="2" />
+            <circle cx={activeRoute.x} cy={activeRoute.y} r="8" className="cyber-signal-origin" />
+            <path d={activeRoute.path} className="cyber-selection-track" />
+            <path d={activeRoute.path} pathLength="1" className="cyber-selection-draw cyber-selection-glow" />
+            <path d={activeRoute.path} pathLength="1" className="cyber-selection-draw" />
+            <path d={activeRoute.path} pathLength="1" className="cyber-selection-packet cyber-selection-packet-halo" />
+            <path d={activeRoute.path} pathLength="1" className="cyber-selection-packet" onAnimationEnd={event => {
+              if (event.animationName !== 'hero-signal-travel') return;
+              setSelection(current => current?.nodeId === selectedNode.id && current.run === selection.run
+                ? { ...current, arrived: true } : current);
+            }} />
+            <circle cx={activeRoute.endX} cy={activeRoute.endY} r="3" className="cyber-signal-terminal" />
           </g>
         </svg>
-        <span className={`cyber-selection-head ${selection.arrived ? 'is-complete' : ''}`} aria-hidden="true"
-          style={{ offsetPath: `path("${signalPath}")`, color: selectedNode.hexColor }}
-          onAnimationEnd={event => {
-            if (event.animationName !== 'hero-led-flight') return;
-            setSelection(current => current?.nodeId === selectedNode.id && current.run === selection.run
-              ? { ...current, arrived: true } : current);
-          }} />
       </React.Fragment>}
     </div>
   );

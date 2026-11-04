@@ -4,6 +4,7 @@ export interface Project {
   subtitle: string;
   category: 'iot' | 'frontend' | 'enterprise';
   domain?: string;
+  relatedLinks?: { label: string; url: string }[];
   period?: string;
   company?: string;
   description: string;
@@ -383,8 +384,8 @@ export const PROJECTS: Project[] = [
       'Built and optimized e-commerce platforms using ReactJS, Next.js, and Redux.',
       'Developed Progressive Web Apps (PWA) with React Native Web for both web and mobile experiences.',
       'Implemented state management for shopping cart, product filtering, and user authentication.',
-      'Integrated REST APIs and payment gateways with high security.',
-      'Applied SSR/SSG for technical SEO and lightning-fast load times.',
+      'Integrated REST APIs and payment gateways.',
+      'Applied SSR/SSG for technical SEO and frontend performance.',
       'Configured Firebase for authentication, hosting, and cloud services.',
       'Ensured responsive design, cross-browser compatibility, and performance optimization.',
     ],
@@ -406,11 +407,11 @@ export const PROJECTS: Project[] = [
       result: 'Delivered reusable banking components and a shared structure for digital content.',
     },
     description:
-      'Page introducing TECHCOMBANK banking information, serving millions of banking customers across Vietnam.',
+      'A banking information website with reusable Adobe Experience Manager components, centralized digital assets, and content-authoring workflows.',
     highlights: [
       'Maintained web author content management system (CMS) Adobe Experience Manager (AEM).',
       'Customized and developed modular components within AEM using Vanilla JavaScript, enabling drag-and-drop page building and reusable front-end modules for dynamic content creation.',
-      'Authored and published digital assets, content, and financial documents in a centralized asset management system.',
+      'Authored and published digital assets, content, and documents in a centralized asset management system.',
       'Maintained authoring structure, content fragments, technical SEO, accessibility (A11y), and authoring requirements across all executed tasks.',
     ],
     technologies: ['Adobe Experience Manager (AEM)', 'Vanilla JavaScript', 'CMS Architecture', 'Technical SEO', 'A11y'],
@@ -423,8 +424,13 @@ export const PROJECTS: Project[] = [
     company: 'NashTech VN',
     period: 'Enterprise Project',
     featured: false,
+    caseSummary: {
+      problem: 'Support FMCG business operations for Tân Hiệp Phát through a web-based platform.',
+      action: 'Built Angular and .NET Blazor/Razor Pages interfaces, reusable components, RxJS state, and .NET API integrations.',
+      result: 'Delivered frontend modules and synchronized views for FMCG operational workflows.',
+    },
     description:
-      'Developed a web-based platform supporting FMCG business operations for Tân Hiệp Phát, optimizing supply chain, inventory, and field operation workflows.',
+      'Developed a web-based platform supporting FMCG business operations for Tân Hiệp Phát, with Angular and .NET interfaces connected to backend APIs.',
     highlights: [
       'Developed dynamic, high-performance web interfaces using Angular (v14+) and .NET Blazor/Razor Pages.',
       'Built reusable UI components and managed complex application states using RxJS and Angular Services.',
@@ -439,6 +445,7 @@ export const PROJECTS: Project[] = [
     category: 'frontend',
     company: 'NashTech VN',
     domain: 'https://www.nashtechglobal.com',
+    relatedLinks: [{ label: 'Virtual Vietnam', url: 'https://virtualvietnam.nashtechglobal.com' }],
     period: 'NashTech VN',
     featured: true,
     previewImage: 'career/nashtech-engineering.svg',
@@ -465,6 +472,11 @@ export const PROJECTS: Project[] = [
     company: 'Freelance Client',
     period: 'Contract',
     featured: false,
+    caseSummary: {
+      problem: 'Connect a customized Shopify storefront with back-office operations and metadata management.',
+      action: 'Customized the Liquid storefront and built an Angular / TypeScript admin dashboard with RxJS, REST APIs, and Shopify Admin API synchronization.',
+      result: 'Delivered the storefront and a dedicated Angular CMS for managing metadata and synchronized commerce data.',
+    },
     description:
       'Developed a customized Shopify e-commerce platform integrated with a tailor-made Angular CMS to streamline back-office operations and enhance SEO performance.',
     highlights: [
@@ -483,6 +495,11 @@ export const PROJECTS: Project[] = [
     domain: 'https://www.open.edu/openlearn/',
     period: 'Enterprise Project',
     featured: false,
+    caseSummary: {
+      problem: 'Build accessible university homepage and online-learning tool interfaces while the learning platform transitions from Drupal to Moodle.',
+      action: 'Built Vanilla JavaScript, jQuery, and Bootstrap modules; integrated Drupal and adapted functionality for Moodle with WCAG accessibility work.',
+      result: 'Delivered homepage and learning-tool interfaces, plus frontend changes supporting the Drupal-to-Moodle transition.',
+    },
     description:
       'The homepage of the UK Open University, completing the user interface and creating pages of interactive online learning tools.',
     highlights: [
@@ -496,14 +513,19 @@ export const PROJECTS: Project[] = [
   {
     id: 'socotec-platform',
     title: 'Socotec Mobile & Web Application',
-    subtitle: 'Testing & Certification Industrial Portal',
+    subtitle: 'Fliplet-Based Mobile Application & Web Frontend',
     category: 'enterprise',
     company: 'NashTech VN',
     domain: 'https://www.socotec.com/',
     period: 'Client Project',
     featured: false,
+    caseSummary: {
+      problem: 'Keep the web frontend and Fliplet-based mobile application consistent through interface updates.',
+      action: 'Built Vanilla JavaScript, jQuery, and Bootstrap 4 modules and collaborated with Umbraco, Docker, PostgreSQL, and Fliplet backend teams.',
+      result: 'Delivered responsive web modules, component-usability improvements, and mobile integration updates.',
+    },
     description:
-      'A cross-platform mobile and web application created based on the Fliplet engine and Umbraco CMS for international testing and certification leader Socotec.',
+      'A Fliplet-based mobile application and connected web frontend, developed in collaboration with backend teams using Umbraco CMS, Docker, and PostgreSQL.',
     highlights: [
       'Built and maintained website and front-end modules using Vanilla JavaScript, jQuery, and Bootstrap 4.',
       'Collaborated with back-end teams using technologies such as Umbraco CMS, Docker, PostgreSQL, and Fliplet engine.',
@@ -514,18 +536,23 @@ export const PROJECTS: Project[] = [
   {
     id: 'aoste-food',
     title: 'Aoste - Restaurants & Food Portal',
-    subtitle: 'Responsive Brand Showcase for French Charcuterie Leader',
+    subtitle: 'Responsive Restaurant & Food Website',
     category: 'frontend',
     company: 'NashTech VN',
     domain: 'https://aoste.fr',
     period: 'Client Project',
     featured: false,
+    caseSummary: {
+      problem: 'Maintain a responsive restaurant and food website with consistent interactions across devices.',
+      action: 'Built and maintained Vanilla JavaScript, jQuery, and Bootstrap 3 modules and verified, troubleshot, and fixed frontend bugs.',
+      result: 'Maintained responsive food-brand pages and resolved interface issues to support stable website operation.',
+    },
     description:
-      'Web application for leading French food and restaurant brand Aoste, ensuring high brand visual fidelity, responsive design, and smooth user interactions.',
+      'A restaurant and food website for Aoste, with responsive frontend modules, ongoing maintenance, and interface bug fixes.',
     highlights: [
       'Built and maintained website and front-end modules using Vanilla JavaScript, jQuery, and Bootstrap 3.',
       'Ensured full responsive design and smooth user experience across mobile and desktop devices.',
-      'Verified, troubleshot, and fixed bugs to ensure stable website performance under traffic.',
+      'Verified, troubleshot, and fixed bugs to support stable website performance.',
     ],
     technologies: ['Vanilla JavaScript', 'jQuery', 'Bootstrap 3', 'Responsive Design'],
   },

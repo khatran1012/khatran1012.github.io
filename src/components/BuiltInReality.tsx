@@ -9,15 +9,42 @@ import {
 } from 'lucide-react';
 import { PROJECTS, Project } from '../data/cvData';
 import { ProjectPreview } from './ProjectPreview';
+import { ProjectSculpture } from './ProjectSculpture';
+import './built-in-reality.css';
+
+// Keep the user's requested project selection consistent in the page and case links.
+const EXCLUDED_PROJECTS = new Set(['oness-fmcg', 'shopify-custom-cms', 'aoste-food']);
+const VISIBLE_PROJECTS = PROJECTS.filter(project => !EXCLUDED_PROJECTS.has(project.id));
+const PROJECT_EDITIONS: Record<string, { label: string; discipline: string; short: string }> = {
+  'theme-park-iot': { label: 'Beyond the browser.', discipline: 'SERVICES × PHYSICAL EDGE', short: 'Theme Park & IoT' },
+  'marina-bay-sands': { label: 'From discovery to checkout.', discipline: 'COMMERCE × EXPERIENCE', short: 'Marina Bay Sands' },
+  'techcombank-portal': { label: 'A system for every story.', discipline: 'CONTENT × COMPONENTS', short: 'Techcombank' },
+  'nashtech-virtual-vietnam': { label: 'A different point of view.', discipline: 'IMMERSIVE × WEB', short: 'Virtual Vietnam' },
+  'open-university-uk': { label: 'Learning, without barriers.', discipline: 'EDUCATION × ACCESSIBILITY', short: 'Open University' },
+  'socotec-platform': { label: 'Connected, on every screen.', discipline: 'WEB × MOBILE INTEGRATION', short: 'Socotec' },
+};
 
 export const BuiltInReality: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [activeProject, setActiveProject] = useState(0);
   const [locationReady, setLocationReady] = useState(false);
 
   useEffect(() => {
     const projectId = new URLSearchParams(window.location.search).get('case');
-    setSelectedProject(PROJECTS.find((project) => project.featured && project.id === projectId) || null);
+    setSelectedProject(VISIBLE_PROJECTS.find((project) => project.id === projectId) || null);
+    const chapter = window.location.hash.slice(1);
+    const linkedProject = VISIBLE_PROJECTS.find(project => chapter === 'reality-project-' + project.id || chapter === 'reality-archive-' + project.id);
+    const index = VISIBLE_PROJECTS.findIndex(project => project.id === (projectId || linkedProject?.id));
+    if (index >= 0) setActiveProject(index);
     setLocationReady(true);
+    if (chapter === 'more-projects' || chapter === 'project-selector' || linkedProject) {
+      document.getElementById('project-selector')?.scrollIntoView({ behavior: 'instant' });
+      if (chapter === 'more-projects' || chapter.startsWith('reality-archive-')) {
+        const url = new URL(window.location.href);
+        url.hash = linkedProject ? 'reality-project-' + linkedProject.id : 'project-selector';
+        window.history.replaceState(window.history.state, '', url);
+      }
+    }
   }, []);
 
   const caseStudyRef = useRef<HTMLDialogElement>(null);
@@ -113,10 +140,10 @@ export const BuiltInReality: React.FC = () => {
   };
 
   return (
-    <section id="reality" className="section section-alt">
+    <section id="reality" className="section section-alt reality-section">
       <div className="container">
         {/* Section Header */}
-        <div style={{ marginBottom: '3rem' }}>
+        <div className="reality-section-heading">
           <div className="chapter-badge">
             <Building2 size={13} />
             <span>CHAPTER 02 // BUILT IN REALITY</span>
@@ -125,140 +152,47 @@ export const BuiltInReality: React.FC = () => {
             Selected work.<br /><span className="accent-patina">Real-world constraints.</span>
           </h2>
           <p className="chapter-desc">
-            Four projects across interfaces, services, and the physical edge.
+            {VISIBLE_PROJECTS.length} projects across interfaces, services, education, and the physical edge.
             The problem, my contribution, and what shipped—followed by the decisions behind it.
           </p>
         </div>
 
-        {/* Four case studies with room for readable summaries. */}
-        <div className="artifacts-grid">
-          {PROJECTS.filter((p) => p.featured).map((project, idx) => {
-            const story = EXHIBITION_STORIES[project.id] || {
-              problem: project.description,
-              architecture: project.technologies.join(', '),
-              ownership: project.highlights[0] || '',
-              tradeoffs: 'See the project details for implementation context.',
-              results: project.highlights[0] || project.description,
-            };
-
-            return (
-              <article
-                key={project.id}
-                className="arch-slab"
-                style={{
-                  padding: '1.4rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  height: '100%',
-                }}
-              >
-                <div>
-                  <ProjectPreview project={project} />
-                  {/* Top Metadata */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '0.85rem',
-                      gap: '0.5rem',
-                    }}
-                  >
-                    <span className="arch-tag patina" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
-                      0{idx + 1} // {project.company?.toUpperCase()}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: '0.7rem',
-                        color: 'var(--text-tertiary)',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {project.period}
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <h3
-                    style={{
-                      fontFamily: 'var(--font-editorial)',
-                      fontSize: '1.18rem',
-                      color: 'var(--text-ivory)',
-                      lineHeight: 1.25,
-                      marginBottom: '0.35rem',
-                      minHeight: '2.9rem',
-                    }}
-                  >
-                    {project.title}
-                  </h3>
-
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.74rem',
-                      color: 'var(--copper-warm-bright)',
-                      marginBottom: '1rem',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                    title={project.subtitle}
-                  >
-                    {project.subtitle}
-                  </div>
-
-                  <dl className="project-par">
-                    <div><dt>01 / Problem</dt><dd>{project.caseSummary?.problem || story.problem}</dd></div>
-                    <div><dt>02 / Solution</dt><dd>{project.caseSummary?.action || story.ownership}</dd></div>
-                    <div><dt>03 / Outcome &amp; Evidence</dt><dd>{project.caseSummary?.result || story.results}</dd></div>
+        <div className="reality-showcase" aria-label="Selected project showcase">
+          <fieldset id="project-selector" className="reality-project-index">
+            <legend>SELECT A PROJECT <span>01 — {String(VISIBLE_PROJECTS.length).padStart(2, '0')} / CASE STUDIES</span></legend>
+            {VISIBLE_PROJECTS.map((project, index) => {
+              return <label key={project.id} className="reality-project-choice">
+                <input type="radio" name="reality-project" id={'reality-choice-' + index} value={index}
+                  checked={activeProject === index} onChange={() => setActiveProject(index)}
+                  aria-controls={'reality-project-' + project.id} />
+                <span className="reality-project-choice-surface"><span className="reality-choice-number">0{index + 1}</span><span className="reality-choice-copy"><strong>{PROJECT_EDITIONS[project.id].short}</strong><span>{PROJECT_EDITIONS[project.id].discipline}</span></span></span>
+              </label>;
+            })}
+          </fieldset>
+          <div className="reality-project-stage">
+            {VISIBLE_PROJECTS.map((project, index) => {
+              const story = EXHIBITION_STORIES[project.id];
+              return <article key={project.id} id={'reality-project-' + project.id} data-cv-project={project.id} className={'reality-project-panel reality-project-panel-' + index} aria-labelledby={'reality-title-' + project.id}>
+                <div className="reality-project-copy">
+                  <div className="reality-project-meta"><span>SELECTED WORK / 0{index + 1}</span><span>{project.period}</span></div>
+                  <p className="reality-company">{project.company}</p>
+                  <h3 id={'reality-title-' + project.id}>{project.title}</h3>
+                  <p className="reality-project-subtitle">{project.subtitle}</p>
+                  <dl className="reality-project-story">
+                    <div><dt><span>01</span> Problem</dt><dd>{project.caseSummary?.problem || story?.problem || project.description}</dd></div>
+                    <div><dt><span>02</span> My Solution</dt><dd>{project.caseSummary?.action || story?.ownership || project.highlights[0]}</dd></div>
+                    <div className="reality-shipped"><dt><span>03</span> Outcome</dt><dd>{project.caseSummary?.result || story?.results || project.description}</dd></div>
                   </dl>
-
-                  {/* Tech Stack Pills */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '1.25rem' }}>
-                    {project.technologies.slice(0, 3).map((t) => (
-                      <span key={t} className="arch-tag" style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem' }}>
-                        {t}
-                      </span>
-                    ))}
-                    {project.technologies.length > 3 && (
-                      <span className="arch-tag" style={{ fontSize: '0.68rem', color: 'var(--text-tertiary)', padding: '0.15rem 0.45rem' }}>
-                        +{project.technologies.length - 3}
-                      </span>
-                    )}
-                  </div>
+                  <div className="reality-project-technologies" aria-label="Project technologies">{project.technologies.slice(0, 4).map(technology => <span key={technology}>{technology}</span>)}{project.technologies.length > 4 && <span>+{project.technologies.length - 4} in case study</span>}</div>
+                  <details className="reality-project-responsibilities"><summary>All responsibilities in the CV <span>{project.highlights.length}</span></summary><ul>{project.highlights.map(highlight => <li key={highlight}>{highlight}</li>)}</ul></details>
+                  <div className="reality-project-actions"><button type="button" onClick={() => setSelectedProject(project)} className="reality-case-button" aria-haspopup="dialog">Read case study<span><ArrowUpRight size={18} /></span></button>{project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer">Source code<ExternalLink size={13} /></a>}{project.domain && <a href={project.domain} target="_blank" rel="noopener noreferrer" title="Visit project website (opens in a new tab)">Visit website<ExternalLink size={13} /></a>}{project.relatedLinks?.map(link => <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label}<ExternalLink size={13} /></a>)}</div>
                 </div>
-
-                {/* Inspect Case Study Button */}
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <button
-                    onClick={() => setSelectedProject(project)}
-                    className="btn-arch btn-arch-outline"
-                    style={{ flex: 1, padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}
-                  >
-                    <span>Read case study</span>
-                    <ArrowUpRight size={14} />
-                  </button>
-                  {project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer" className="btn-arch btn-arch-outline" style={{ fontSize: '0.8rem', padding: '0.5rem 0.75rem' }}>Source code</a>}
-                  {project.domain && (
-                    <a
-                      href={project.domain}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-arch btn-arch-outline"
-                      style={{ padding: '0.5rem 0.65rem' }}
-                      title="Visit project website (opens in a new tab)"
-                    >
-                      <span>Website</span><ExternalLink size={14} />
-                    </a>
-                  )}
-                </div>
-              </article>
-            );
-          })}
+                <div className="reality-project-art"><div className="reality-art-heading"><span>THE PROJECT, IN PERSPECTIVE</span><span>↗</span></div><ProjectSculpture index={index} discipline={PROJECT_EDITIONS[project.id].discipline} /><p className="reality-art-statement">{PROJECT_EDITIONS[project.id].label}</p></div>
+              </article>;
+            })}
+          </div>
         </div>
-        <p className="project-privacy-note">Illustrations describe the engineering context. Public websites are linked where available; client source code and internal demos are not published here.</p>
+        <p className="reality-project-footnote"><span>{VISIBLE_PROJECTS.length} PROJECTS. ONE ENGINEERING PRACTICE.</span><span>Concept illustrations. Read the full contribution and technologies in each case study.</span></p>
 
         {/* Interactive Case Study Modal */}
         <AnimatePresence onExitComplete={finishClose}>
@@ -346,15 +280,19 @@ export const BuiltInReality: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="case-study-visual">
+                {selectedProject.previewImage && <div className="case-study-visual">
                   <ProjectPreview project={selectedProject} />
                   <p>Illustrative engineering context. My delivery scope is described in “My Role” below.</p>
-                </div>
+                </div>}
 
                 {/* Narrative Sections */}
                 {(() => {
                   const s = EXHIBITION_STORIES[selectedProject.id];
-                  if (!s) return null;
+                  if (!s) return <div className="reality-cv-detail">
+                    <p className="reality-cv-subtitle">{selectedProject.subtitle}</p>
+                    <h4>Project overview</h4><p>{selectedProject.description}</p>
+                    {selectedProject.caseSummary && <><h4>My contribution</h4><p>{selectedProject.caseSummary.action}</p><h4>Delivered</h4><p>{selectedProject.caseSummary.result}</p></>}
+                  </div>;
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
                       <div style={{ padding: '1.25rem', background: 'var(--bg-canvas)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-arch)' }}>
@@ -395,6 +333,11 @@ export const BuiltInReality: React.FC = () => {
                   );
                 })()}
 
+                <section className="reality-cv-detail" aria-label="Full responsibilities from the CV">
+                  <h4>Responsibilities in my CV</h4>
+                  <ul>{selectedProject.highlights.map(highlight => <li key={highlight}>{highlight}</li>)}</ul>
+                </section>
+
                 {/* Technologies List */}
                 <div style={{ marginBottom: '2rem' }}>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
@@ -409,6 +352,12 @@ export const BuiltInReality: React.FC = () => {
                     ))}
                   </div>
                 </div>
+
+                {(selectedProject.domain || selectedProject.sourceUrl || selectedProject.relatedLinks?.length) ? <div className="reality-project-actions reality-case-links">
+                  {selectedProject.domain && <a href={selectedProject.domain} target="_blank" rel="noopener noreferrer">Visit project website<ExternalLink size={14} /></a>}
+                  {selectedProject.sourceUrl && <a href={selectedProject.sourceUrl} target="_blank" rel="noopener noreferrer">Source code<ExternalLink size={14} /></a>}
+                  {selectedProject.relatedLinks?.map(link => <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label}<ExternalLink size={14} /></a>)}
+                </div> : null}
 
                 {/* Close Button */}
                 <button

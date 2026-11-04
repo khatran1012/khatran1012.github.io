@@ -13,6 +13,53 @@ for (const content of ['Kha Tran', 'Trần Đình Kha', 'id="reality"', 'id="nex
 }
 assert.ok(!html.includes('<div id="root"></div>'), 'The portfolio must work without JavaScript.');
 assert.ok(html.indexOf('id="reality"') < html.indexOf('id="system"'), 'Projects must precede the optional 3D experience.');
+
+// Preserve the user's six-project selection even when the CV data grows.
+const expectedProjectIds = [
+  'theme-park-iot',
+  'marina-bay-sands',
+  'techcombank-portal',
+  'nashtech-virtual-vietnam',
+  'open-university-uk',
+  'socotec-platform',
+];
+const projectArticles = [...html.matchAll(/<article\b[^>]*\bdata-cv-project="([^"]+)"[^>]*>([\s\S]*?)<\/article>/g)];
+const renderedProjectIds = projectArticles.map(([, id]) => id);
+assert.equal(renderedProjectIds.length, expectedProjectIds.length, 'Expected exactly six prerendered CV project articles.');
+assert.equal(new Set(renderedProjectIds).size, renderedProjectIds.length, 'CV projects must not appear more than once.');
+assert.deepEqual([...renderedProjectIds].sort(), [...expectedProjectIds].sort(), 'The project catalogue must preserve the selected projects and exclude ONESS, Shopify and Aoste.');
+const projectChoices = [...html.matchAll(/<input\b[^>]*>/g)].map(([input]) => input)
+  .filter(input => input.includes('type="radio"') && input.includes('name="reality-project"'));
+assert.equal(projectChoices.length, expectedProjectIds.length, 'Every project must belong to the same six-choice radio showcase.');
+const projectResponsibilities = new Map();
+for (const [index, projectId] of expectedProjectIds.entries()) {
+  const article = projectArticles.find(([, id]) => id === projectId)?.[0];
+  assert.ok(article?.includes(`id="reality-project-${projectId}"`), `Missing showcase panel for ${projectId}.`);
+  const choices = projectChoices.filter(input => input.includes(`aria-controls="reality-project-${projectId}"`));
+  assert.equal(choices.length, 1, `${projectId} must have exactly one radio control targeting its panel.`);
+  assert.ok(choices[0].includes(`id="reality-choice-${index}"`), `${projectId} has the wrong showcase selector target.`);
+  const illustrations = [...article.matchAll(/<div\b[^>]*\bclass="([^"]*)"[^>]*>/g)]
+    .filter(([, classes]) => classes.split(/\s+/).includes('reality-sculpture'));
+  assert.equal(illustrations.length, 1, `${projectId} must include its own project illustration.`);
+  assert.ok(illustrations[0][1].split(/\s+/).includes(`reality-sculpture-${index}`), `${projectId} has the wrong illustration edition.`);
+  const details = [...article.matchAll(/<details\b[^>]*\bclass="([^"]*)"[^>]*>([\s\S]*?)<\/details>/g)]
+    .filter(([, classes]) => classes.split(/\s+/).includes('reality-project-responsibilities'));
+  assert.equal(details.length, 1, `${projectId} responsibilities must be available in native details without JavaScript.`);
+  projectResponsibilities.set(projectId, details[0][2]);
+}
+assert.ok(!/\bid="more-projects"/.test(html), 'Projects must not be split into a separate archive section.');
+assert.ok(!/\bclass="[^"]*\b(?:reality-project-archive|reality-archive-card)\b/.test(html), 'Separate project archive cards must not remain alongside the unified showcase.');
+for (const [projectId, responsibilities] of [
+  ['open-university-uk', ['Drupal', 'Moodle', 'WCAG']],
+  ['socotec-platform', ['Fliplet', 'Umbraco']],
+]) {
+  const detail = projectResponsibilities.get(projectId);
+  for (const responsibility of responsibilities) {
+    assert.ok(detail.includes(responsibility), `${projectId} details are missing the CV responsibility: ${responsibility}`);
+  }
+}
+console.log('Unified six-project showcase, radio targets, illustrations and CV responsibilities verified in static HTML.');
+
 assert.ok(html.includes('data-exploring="false"'), 'The generated page must start with 3D disabled.');
 assert.ok(!html.includes('<canvas'), 'WebGL must not mount in the initial HTML.');
 assert.ok(!html.includes('__SITE_URL__'), 'Unresolved metadata placeholder.');
