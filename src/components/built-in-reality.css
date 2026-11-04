@@ -28,7 +28,7 @@
 .reality-project-choice input:checked + span .reality-choice-number { color: var(--copper-patina-bright); }
 .reality-project-choice input:checked + span > svg:not(.reality-choice-arrow) { display: none; }
 .reality-project-choice input:checked + span > .reality-choice-arrow { display: block; opacity: 1; }
-.reality-project-choice:hover .reality-project-choice-surface { border-color: var(--copper-patina); box-shadow: var(--reality-card-shadow); }
+.reality-project-choice:hover .reality-project-choice-surface { border-color: var(--copper-patina); }
 .reality-project-choice input:focus-visible + span { outline: 2px solid var(--copper-patina-bright); outline-offset: 4px; z-index: 1; }
 .reality-project-panel { display: none; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.15fr); gap: clamp(2rem, 4vw, 4.5rem); align-items: stretch; min-width: 0; }
 .reality-showcase:has(#reality-choice-0:checked) .reality-project-panel-0,

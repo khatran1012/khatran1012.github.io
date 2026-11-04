@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { OriginHero } from './components/OriginHero';
 import { SystemAnatomy } from './components/SystemAnatomy';
@@ -6,6 +6,14 @@ import { PressureSimulations } from './components/PressureSimulations';
 import { BuiltInReality } from './components/BuiltInReality';
 import { WhatsNext } from './components/WhatsNext';
 import { ExhibitionFooter } from './components/ExhibitionFooter';
+
+// Theme colors inherit from CSS. These chapters do not need a second render
+// when the saved theme is restored or the header switches it.
+const MemoOriginHero = memo(OriginHero);
+const MemoBuiltInReality = memo(BuiltInReality);
+const MemoPressureSimulations = memo(PressureSimulations);
+const MemoWhatsNext = memo(WhatsNext);
+const MemoExhibitionFooter = memo(ExhibitionFooter);
 
 export const App: React.FC = () => {
   // The first client render must match the generated HTML in either theme.
@@ -19,7 +27,9 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (!themeReady) return;
-    document.documentElement.setAttribute('data-theme', theme);
+    if (document.documentElement.dataset.theme !== theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
     try {
       localStorage.setItem('kt-exhibition-theme', theme);
     } catch {
@@ -60,9 +70,11 @@ export const App: React.FC = () => {
       });
     }, { rootMargin: '0px 0px 64px 0px', threshold: 0 });
 
-    blocks.forEach((block) => {
-      // Keep content already on screen visible, including direct chapter links.
-      if (block.getBoundingClientRect().top < window.innerHeight) return;
+    // Read all positions before changing classes, avoiding a forced layout for
+    // every block during hydration. Direct chapter links remain visible.
+    const viewportHeight = window.innerHeight;
+    const offscreen = Array.from(blocks).filter(block => block.getBoundingClientRect().top >= viewportHeight);
+    offscreen.forEach((block) => {
       block.classList.add('scroll-reveal');
       observer.observe(block);
     });
@@ -81,21 +93,21 @@ export const App: React.FC = () => {
       <Navbar theme={theme} toggleTheme={toggleTheme} />
       <main id="main-content" style={{ flex: 1 }}>
         {/* Chapter 01 — The Origin */}
-        <OriginHero />
+        <MemoOriginHero />
 
         {/* Chapter 02 — Selected Work */}
-        <BuiltInReality />
+        <MemoBuiltInReality />
 
         {/* Chapter 03 — Inside the System */}
         <SystemAnatomy theme={theme} />
 
         {/* Chapter 04 — Decisions Under Pressure */}
-        <PressureSimulations />
+        <MemoPressureSimulations />
 
         {/* Chapter 05 — What's Next? */}
-        <WhatsNext />
+        <MemoWhatsNext />
       </main>
-      <ExhibitionFooter />
+      <MemoExhibitionFooter />
     </div>
   );
 };

@@ -103,6 +103,16 @@ for (const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
   assert.ok(url.pathname.startsWith(base), `Asset escapes Pages base: ${value}`);
   await access(`dist/${decodeURIComponent(url.pathname.slice(base.length))}`);
 }
+// A valid fallback src does not protect a missing responsive image candidate.
+for (const [, candidates] of html.matchAll(/\bsrcset="([^"]+)"/gi)) {
+  for (const candidate of candidates.split(',')) {
+    const value = candidate.trim().split(/\s+/)[0];
+    if (/^(?:https?:|data:)/.test(value)) continue;
+    const url = new URL(value, siteUrl);
+    await access(`dist/${decodeURIComponent(url.pathname.slice(1))}`);
+  }
+}
+assert.ok(html.includes('href="tel:+84326004229"'), 'Phone links must include the international prefix.');
 const assets = await readdir('dist/assets');
 const manifest = JSON.parse(await readFile('dist/.vite/manifest.json', 'utf8'));
 const entry = Object.keys(manifest).find(key => manifest[key].isEntry && manifest[key].src === 'index.html');

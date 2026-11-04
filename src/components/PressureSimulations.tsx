@@ -218,6 +218,8 @@ export const PressureSimulations: React.FC = () => {
 
         {/* Simulation Selector Tabs */}
         <div
+          role="group"
+          aria-label="Choose a simulation"
           style={{
             display: 'flex',
             gap: '0.75rem',
@@ -231,7 +233,11 @@ export const PressureSimulations: React.FC = () => {
             return (
               <button
                 key={spec.id}
+                id={`simulation-selector-${spec.id}`}
+                type="button"
                 onClick={() => setActiveTab(index)}
+                aria-pressed={isSelected}
+                aria-controls="simulation-workspace"
                 className={`arch-slab ${isSelected ? 'active' : ''}`}
                 style={{
                   padding: '1rem 1.4rem',
@@ -276,6 +282,9 @@ export const PressureSimulations: React.FC = () => {
 
         {/* Current Active Simulation Workspace */}
         <div
+          id="simulation-workspace"
+          role="region"
+          aria-labelledby={`simulation-selector-${SIMULATION_SPECS[activeTab].id}`}
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',

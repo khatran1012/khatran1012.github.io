@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, ArrowUpRight, Menu, X } from 'lucide-react';
 import { PERSONAL_INFO } from '../data/cvData';
 
@@ -11,6 +11,25 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeChapter, setActiveChapter] = useState('#origin');
+  const menuToggle = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setMobileMenuOpen(false);
+      menuToggle.current?.focus({ preventScroll: true });
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1200px)');
+    const closeDesktopMenu = () => { if (desktop.matches) setMobileMenuOpen(false); };
+    desktop.addEventListener('change', closeDesktopMenu);
+    return () => desktop.removeEventListener('change', closeDesktopMenu);
+  }, []);
 
   useEffect(() => {
     if (!('IntersectionObserver' in window)) return;
@@ -73,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
               gap: '0.85rem',
               textDecoration: 'none',
             }}
-            aria-label="The Anatomy of Building Exhibition Home"
+            aria-label={`KT ${PERSONAL_INFO.name} Software Engineer — exhibition home`}
           >
             <div
               style={{
@@ -187,6 +206,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
             </a>
 
             <button
+              ref={menuToggle}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               style={{
                 width: '38px',
@@ -248,11 +268,14 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, toggleTheme }) => {
       </div>
 
       <style>{`
-        @media (min-width: 900px) {
+        @media (min-width: 1200px) {
           .desktop-chapters {
             display: flex !important;
           }
           .mobile-chapters-toggle {
+            display: none !important;
+          }
+          #mobile-chapters {
             display: none !important;
           }
         }

@@ -3,8 +3,8 @@ const TRACES = ['M0 220H210L285 295H470L540 365H780L910 235H1200', 'M0 440H185L2
 export function NanoCircuitBackdrop() {
   return <div className="cyber-nano-space" aria-hidden="true">
     <picture>
-      <source type="image/avif" srcSet="./nano-circuit-substrate-1600.avif 1600w, ./nano-circuit-substrate-2400.avif 2400w" sizes="(min-width: 1600px) 1900px, (min-width: 1024px) 130vw, 220vw" />
-      <source type="image/webp" srcSet="./nano-circuit-substrate-1600.webp 1600w, ./nano-circuit-substrate-2400.webp 2400w" sizes="(min-width: 1600px) 1900px, (min-width: 1024px) 130vw, 220vw" />
+      <source type="image/avif" srcSet="./nano-circuit-substrate-960.avif 960w, ./nano-circuit-substrate-1280.avif 1280w, ./nano-circuit-substrate-1600.avif 1600w, ./nano-circuit-substrate-2400.avif 2400w" sizes="(min-width: 1520px) 1350px, (min-width: 1280px) calc(131vw - 638px), (min-width: 760px) calc(220vw - 682px), calc(220vw - 110px)" />
+      <source type="image/webp" srcSet="./nano-circuit-substrate-960.webp 960w, ./nano-circuit-substrate-1280.webp 1280w, ./nano-circuit-substrate-1600.webp 1600w, ./nano-circuit-substrate-2400.webp 2400w" sizes="(min-width: 1520px) 1350px, (min-width: 1280px) calc(131vw - 638px), (min-width: 760px) calc(220vw - 682px), calc(220vw - 110px)" />
       <img className="cyber-nano-layer" src="./nano-circuit-substrate-1600.webp" width="1200" height="700" alt="" decoding="async" {...{ fetchpriority: 'low' }} />
     </picture>
     <svg className="cyber-nano-signals" viewBox="0 0 1200 700" fill="none">

@@ -1,0 +1,186 @@
+[
+  {
+    "viewportKind": "desktop",
+    "theme": "dark",
+    "samples": {
+      "dark:859.109375x552.5:1": {
+        "frames": 70,
+        "medianMs": 16.40000009536743,
+        "p95Ms": 19.199999809265137,
+        "calls": 127,
+        "triangles": 52178,
+        "dpr": 1
+      },
+      "dark:859.109375x552.5:2": {
+        "frames": 71,
+        "medianMs": 16.600000143051147,
+        "p95Ms": 18.600000143051147,
+        "calls": 44,
+        "triangles": 21886,
+        "dpr": 1
+      },
+      "dark:859.109375x552.5:3": {
+        "frames": 70,
+        "medianMs": 16.600000143051147,
+        "p95Ms": 18.200000047683716,
+        "calls": 46,
+        "triangles": 18558,
+        "dpr": 1
+      },
+      "dark:859.109375x552.5:4": {
+        "frames": 70,
+        "medianMs": 16.600000143051147,
+        "p95Ms": 18.800000190734863,
+        "calls": 61,
+        "triangles": 22062,
+        "dpr": 1
+      },
+      "dark:859.109375x552.5:5": {
+        "frames": 60,
+        "medianMs": 16.40000009536743,
+        "p95Ms": 18.600000143051147,
+        "calls": 58,
+        "triangles": 21162,
+        "dpr": 1
+      }
+    }
+  },
+  {
+    "viewportKind": "desktop",
+    "theme": "light",
+    "samples": {
+      "light:859.109375x552.5:1": {
+        "frames": 69,
+        "medianMs": 16.600000143051147,
+        "p95Ms": 19,
+        "calls": 127,
+        "triangles": 52178,
+        "dpr": 1
+      },
+      "light:859.109375x552.5:2": {
+        "frames": 70,
+        "medianMs": 16.59999990463257,
+        "p95Ms": 18.5,
+        "calls": 44,
+        "triangles": 21886,
+        "dpr": 1
+      },
+      "light:859.109375x552.5:3": {
+        "frames": 70,
+        "medianMs": 16.5,
+        "p95Ms": 18.600000143051147,
+        "calls": 46,
+        "triangles": 18558,
+        "dpr": 1
+      },
+      "light:859.109375x552.5:4": {
+        "frames": 70,
+        "medianMs": 16.5,
+        "p95Ms": 18.90000009536743,
+        "calls": 61,
+        "triangles": 22062,
+        "dpr": 1
+      },
+      "light:859.109375x552.5:5": {
+        "frames": 60,
+        "medianMs": 16.59999990463257,
+        "p95Ms": 18.700000047683716,
+        "calls": 58,
+        "triangles": 21162,
+        "dpr": 1
+      }
+    }
+  },
+  {
+    "viewportKind": "mobile-emulated",
+    "theme": "dark",
+    "samples": {
+      "dark:340x244.5:1": {
+        "frames": 71,
+        "medianMs": 16.59999990463257,
+        "p95Ms": 18.800000190734863,
+        "calls": 127,
+        "triangles": 52178,
+        "dpr": 1.25
+      },
+      "dark:340x244.5:2": {
+        "frames": 71,
+        "medianMs": 16.59999990463257,
+        "p95Ms": 18.299999952316284,
+        "calls": 44,
+        "triangles": 21886,
+        "dpr": 1.25
+      },
+      "dark:340x244.5:3": {
+        "frames": 70,
+        "medianMs": 16.5,
+        "p95Ms": 18.5,
+        "calls": 45,
+        "triangles": 18558,
+        "dpr": 1.25
+      },
+      "dark:340x244.5:4": {
+        "frames": 71,
+        "medianMs": 16.59999990463257,
+        "p95Ms": 18.90000009536743,
+        "calls": 59,
+        "triangles": 21462,
+        "dpr": 1.25
+      },
+      "dark:340x244.5:5": {
+        "frames": 60,
+        "medianMs": 16.600000143051147,
+        "p95Ms": 18.699999809265137,
+        "calls": 59,
+        "triangles": 21462,
+        "dpr": 1.25
+      }
+    }
+  },
+  {
+    "viewportKind": "mobile-emulated",
+    "theme": "light",
+    "samples": {
+      "light:340x244.5:1": {
+        "frames": 71,
+        "medianMs": 16.59999990463257,
+        "p95Ms": 19,
+        "calls": 127,
+        "triangles": 52178,
+        "dpr": 1.25
+      },
+      "light:340x244.5:2": {
+        "frames": 71,
+        "medianMs": 16.5,
+        "p95Ms": 18.299999952316284,
+        "calls": 44,
+        "triangles": 21886,
+        "dpr": 1.25
+      },
+      "light:340x244.5:3": {
+        "frames": 71,
+        "medianMs": 16.5,
+        "p95Ms": 18.5,
+        "calls": 45,
+        "triangles": 18558,
+        "dpr": 1.25
+      },
+      "light:340x244.5:4": {
+        "frames": 70,
+        "medianMs": 16.700000047683716,
+        "p95Ms": 18.5,
+        "calls": 59,
+        "triangles": 21462,
+        "dpr": 1.25
+      },
+      "light:340x244.5:5": {
+        "frames": 60,
+        "medianMs": 16.5,
+        "p95Ms": 18.299999952316284,
+        "calls": 59,
+        "triangles": 21462,
+        "dpr": 1.25
+      }
+    }
+  }
+]

@@ -182,7 +182,7 @@ export const PERSONAL_INFO = {
   fullName: 'Trần Đình Kha',
   role: 'Software Engineer',
   email: 'khatran1012@gmail.com',
-  phone: '0326004229',
+  phone: '+84326004229',
   displayPhone: '+84 326 004 229',
   location: 'Ho Chi Minh City, Vietnam',
   website: import.meta.env.VITE_SITE_URL,

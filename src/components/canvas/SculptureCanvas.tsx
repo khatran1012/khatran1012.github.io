@@ -52,10 +52,10 @@ const SYSTEM_NODES: SystemNode[] = [
     yPercent: 24,
     color: 'cyan',
     hexColor: '#00f5d4',
-    badgeLabel: 'REACT 19',
-    technologies: ['React 18/19', 'TypeScript', 'UI/UX Performance', 'State Management'],
-    specs: ['Deterministic UI projection', 'Sub-millisecond render cycles', 'WCAG AA accessible'],
-    description: 'Predictable user interfaces eliminating transient state fragmentation. Responsive interactions and zero-layout-shift performance.',
+    badgeLabel: 'REACT / TS',
+    technologies: ['React', 'TypeScript', 'UI/UX Performance', 'State Management'],
+    specs: ['Explicit application state', 'Reusable UI components', 'Keyboard and accessible interactions'],
+    description: 'Responsive interfaces with explicit loading states, reusable components, and accessibility improvements informed by WCAG guidance.',
     targetChapter: '#system',
   },
   {
@@ -70,7 +70,7 @@ const SYSTEM_NODES: SystemNode[] = [
     hexColor: '#ffaa22',
     badgeLabel: 'GOLANG GIN',
     technologies: ['Golang Gin', 'API Contracts', 'Microservices', 'Concurrency Channels'],
-    specs: ['Goroutine lightweight workers', 'Compile-time OpenAPI schemas', 'Sub-millisecond latency'],
+    specs: ['Concurrent goroutine workers', 'Validated API contracts', 'Transactional service boundaries'],
     description: 'Resilient Golang microservices processing concurrent transactions, enforcing strict contracts, and handling peak edge load.',
     targetChapter: '#pressure',
   },
@@ -87,7 +87,7 @@ const SYSTEM_NODES: SystemNode[] = [
     badgeLabel: 'K8S & EDGE',
     technologies: ['Cloud & Edge Gateways', 'Docker / Kubernetes', 'Monitoring / CI/CD', 'IoT Turnstiles'],
     specs: ['Offline-First failover', 'Automated CI/CD pipelines', 'Hardware relay interfacing'],
-    description: 'Autonomous edge controllers and cloud infrastructure designed to survive complete WAN disconnects without service interruption.',
+    description: 'Edge controllers use local ticket snapshots during WAN interruptions and synchronize deferred events when connectivity returns.',
     targetChapter: '#reality',
   },
   {
@@ -102,15 +102,15 @@ const SYSTEM_NODES: SystemNode[] = [
     hexColor: '#26e8db',
     badgeLabel: 'POSTGRES / REDIS',
     technologies: ['PostgreSQL', 'Redis Distributed Lock', 'Data Pipeline', 'Caching & Sync'],
-    specs: ['Row-level pessimistic locking', 'Zero ticket double-spending', 'Write-ahead log sync'],
-    description: 'Deterministic ACID storage combining distributed Redis mutex gates with PostgreSQL for absolute transactional integrity under contention.',
+    specs: ['Row-level transaction locks', 'Coordinated ticket validation', 'Deferred event synchronization'],
+    description: 'PostgreSQL transactions protect central ticket state, with Redis supporting coordination. Disconnected gateways require reconciliation and a duplicate-admission policy.',
     targetChapter: '#system',
   },
 ];
 
 const MODULE_SIZES = {
-  core: '(min-width: 1520px) 165px, (min-width: 1280px) 12vw, (min-width: 760px) calc(27vw - 84px), (min-width: 601px) 27vw, 38vw',
-  other: '(min-width: 1520px) 135px, (min-width: 1280px) 10vw, (min-width: 760px) calc(22vw - 68px), (min-width: 601px) 22vw, 32vw',
+  core: '(min-width: 1520px) 166px, (min-width: 1280px) calc(16.07vw - 78px), (min-width: 760px) calc(27vw - 84px), (min-width: 601px) calc(27vw - 14px), calc(38vw - 19px)',
+  other: '(min-width: 1520px) 136px, (min-width: 1280px) calc(13.1vw - 64px), (min-width: 760px) calc(22vw - 68px), (min-width: 601px) calc(22vw - 11px), calc(32vw - 16px)',
 };
 
 const SIGNAL_CHARGE_MS = 100;
@@ -154,14 +154,14 @@ export const SculptureCanvas: React.FC = () => {
       const bounds = exhibit.getBoundingClientRect();
       const origin = (source.querySelector('.cyber-module-socket') ?? source).getBoundingClientRect();
       const stage = viewport.getBoundingClientRect();
-      exhibit.style.setProperty('--hero-stage-top', `${stage.top - bounds.top}px`);
-      exhibit.style.setProperty('--hero-stage-height', `${stage.height}px`);
       const destination = dock.getBoundingClientRect();
       const x = origin.left + origin.width / 2 - bounds.left;
       const y = origin.top + origin.height / 2 - bounds.top;
       const endX = destination.left + destination.width / 2 - bounds.left;
       const endY = destination.top + destination.height / 2 - bounds.top;
       const bend = Math.max(45, Math.abs(endX - x) * 0.42);
+      exhibit.style.setProperty('--hero-stage-top', `${stage.top - bounds.top}px`);
+      exhibit.style.setProperty('--hero-stage-height', `${stage.height}px`);
       setRoute({ nodeId: selection!.nodeId, run: selection!.run, x, y, endX, endY,
         path: `M ${x.toFixed(1)} ${y.toFixed(1)} C ${(x + bend).toFixed(1)} ${y.toFixed(1)} ${(endX - bend).toFixed(1)} ${endY.toFixed(1)} ${endX.toFixed(1)} ${endY.toFixed(1)}` });
     };
@@ -275,9 +275,9 @@ export const SculptureCanvas: React.FC = () => {
                 onFocus={() => setHighlightedId(node.id)} onBlur={() => setHighlightedId(null)}>
                 <span className="cyber-module-socket" aria-hidden="true" />
                 <picture className="cyber-module-art">
-                  <source type="image/avif" srcSet={`./hero-modules/${node.id}-384.avif 384w, ./hero-modules/${node.id}.avif 768w`}
+                  <source type="image/avif" srcSet={`./hero-modules/${node.id}-192.avif 192w, ./hero-modules/${node.id}-256.avif 256w, ./hero-modules/${node.id}-384.avif 384w, ./hero-modules/${node.id}.avif 768w`}
                     sizes={MODULE_SIZES[node.id === 'core' ? 'core' : 'other']} />
-                  <source type="image/webp" srcSet={`./hero-modules/${node.id}-384.webp 384w, ./hero-modules/${node.id}.webp 768w`}
+                  <source type="image/webp" srcSet={`./hero-modules/${node.id}-192.webp 192w, ./hero-modules/${node.id}-256.webp 256w, ./hero-modules/${node.id}-384.webp 384w, ./hero-modules/${node.id}.webp 768w`}
                     sizes={MODULE_SIZES[node.id === 'core' ? 'core' : 'other']} />
                   <img src={`./hero-modules/${node.id}.webp`} width="768" height="768" alt=""
                     loading="eager" {...{ fetchpriority: node.id === 'core' ? 'high' : 'auto' }} decoding="async" draggable={false}

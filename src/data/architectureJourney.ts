@@ -25,9 +25,9 @@ export interface JourneyMotion {
   hoveredNode: string | null;
 }
 
-export const JOURNEY_PHASES = ['Overview', 'Design', 'Logic', 'Bridge', 'Persistence', 'System'];
-// The final scroll interval reconnects the boards after visiting all five layers.
-export const JOURNEY_SCROLL_STEPS = JOURNEY_PHASES.length;
+export const JOURNEY_PHASES = ['Overview', 'Design', 'Logic', 'Bridge', 'Persistence', 'System', 'Connected'];
+// Include the final reassembly in tab, touch and keyboard navigation as well as wheel travel.
+export const JOURNEY_SCROLL_STEPS = JOURNEY_PHASES.length - 1;
 
 // Hold the camera around each stop; ease through the space between layers.
 export function journeyTravel(progress: number) {

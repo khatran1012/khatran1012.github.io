@@ -15,6 +15,7 @@ import './built-in-reality.css';
 // Keep the user's requested project selection consistent in the page and case links.
 const EXCLUDED_PROJECTS = new Set(['oness-fmcg', 'shopify-custom-cms', 'aoste-food']);
 const VISIBLE_PROJECTS = PROJECTS.filter(project => !EXCLUDED_PROJECTS.has(project.id));
+const CASE_HISTORY_KEY = 'ktCaseStudy';
 const PROJECT_EDITIONS: Record<string, { label: string; discipline: string; short: string }> = {
   'theme-park-iot': { label: 'Beyond the browser.', discipline: 'SERVICES × PHYSICAL EDGE', short: 'Theme Park & IoT' },
   'marina-bay-sands': { label: 'From discovery to checkout.', discipline: 'COMMERCE × EXPERIENCE', short: 'Marina Bay Sands' },
@@ -27,41 +28,89 @@ const PROJECT_EDITIONS: Record<string, { label: string; discipline: string; shor
 export const BuiltInReality: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [activeProject, setActiveProject] = useState(0);
-  const [locationReady, setLocationReady] = useState(false);
+  const historyOwner = useRef('');
+  const closingHistory = useRef(false);
+  const selectedProjectRef = useRef(selectedProject);
+  selectedProjectRef.current = selectedProject;
 
   useEffect(() => {
-    const projectId = new URLSearchParams(window.location.search).get('case');
-    setSelectedProject(VISIBLE_PROJECTS.find((project) => project.id === projectId) || null);
-    const chapter = window.location.hash.slice(1);
-    const linkedProject = VISIBLE_PROJECTS.find(project => chapter === 'reality-project-' + project.id || chapter === 'reality-archive-' + project.id);
-    const index = VISIBLE_PROJECTS.findIndex(project => project.id === (projectId || linkedProject?.id));
-    if (index >= 0) setActiveProject(index);
-    setLocationReady(true);
-    if (chapter === 'more-projects' || chapter === 'project-selector' || linkedProject) {
-      document.getElementById('project-selector')?.scrollIntoView({ behavior: 'instant' });
-      if (chapter === 'more-projects' || chapter.startsWith('reality-archive-')) {
-        const url = new URL(window.location.href);
-        url.hash = linkedProject ? 'reality-project-' + linkedProject.id : 'project-selector';
-        window.history.replaceState(window.history.state, '', url);
+    // A marker from an earlier page load must not make a direct link navigate away on close.
+    historyOwner.current ||= `${Date.now()}-${Math.random()}`;
+    let scrollFrame = 0;
+    const syncLocation = () => {
+      closingHistory.current = false;
+      const url = new URL(window.location.href);
+      const projectId = url.searchParams.get('case');
+      const project = VISIBLE_PROJECTS.find(item => item.id === projectId) || null;
+      setSelectedProject(project);
+      const chapter = url.hash.slice(1);
+      const linkedProject = VISIBLE_PROJECTS.find(item => chapter === 'reality-project-' + item.id || chapter === 'reality-archive-' + item.id);
+      const index = VISIBLE_PROJECTS.findIndex(item => item.id === (project?.id || linkedProject?.id));
+      if (index >= 0) setActiveProject(index);
+      if (chapter === 'more-projects' || chapter === 'project-selector' || linkedProject) {
+        if (chapter === 'more-projects' || chapter.startsWith('reality-archive-')) {
+          url.hash = linkedProject ? 'reality-project-' + linkedProject.id : 'project-selector';
+          window.history.replaceState(window.history.state, '', url);
+        }
+        // Wait for the selected radio and its panel to update before positioning the showcase.
+        cancelAnimationFrame(scrollFrame);
+        scrollFrame = requestAnimationFrame(() => {
+          document.getElementById('project-selector')?.scrollIntoView({ behavior: 'instant' });
+        });
       }
-    }
+    };
+    syncLocation();
+    window.addEventListener('popstate', syncLocation);
+    window.addEventListener('hashchange', syncLocation);
+    return () => {
+      cancelAnimationFrame(scrollFrame);
+      window.removeEventListener('popstate', syncLocation);
+      window.removeEventListener('hashchange', syncLocation);
+    };
   }, []);
+
+  const openCaseStudy = (project: Project) => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('case') !== project.id) {
+      url.searchParams.set('case', project.id);
+      const state = window.history.state;
+      window.history.pushState({
+        ...(state && typeof state === 'object' ? state : {}),
+        [CASE_HISTORY_KEY]: { owner: historyOwner.current, url: url.href },
+      }, '', url);
+    }
+    setActiveProject(VISIBLE_PROJECTS.indexOf(project));
+    setSelectedProject(project);
+  };
+
+  const closeCaseStudy = () => {
+    if (closingHistory.current) return;
+    const entry = window.history.state?.[CASE_HISTORY_KEY];
+    if (entry?.owner === historyOwner.current && entry.url === window.location.href) {
+      closingHistory.current = true;
+      window.history.back();
+      return;
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.delete('case');
+    const state = window.history.state;
+    const nextState = state && typeof state === 'object' ? { ...state } : state;
+    if (nextState && typeof nextState === 'object') delete nextState[CASE_HISTORY_KEY];
+    window.history.replaceState(nextState, '', url);
+    setSelectedProject(null);
+  };
 
   const caseStudyRef = useRef<HTMLDialogElement>(null);
   const restorePage = useRef<(() => void) | null>(null);
   const reducedMotion = useReducedMotion();
   const finishClose = () => {
+    if (selectedProjectRef.current) return;
     restorePage.current?.();
     restorePage.current = null;
   };
   useEffect(() => () => { restorePage.current?.(); }, []);
 
   useEffect(() => {
-    if (!locationReady) return;
-    const url = new URL(window.location.href);
-    if (selectedProject) url.searchParams.set('case', selectedProject.id);
-    else url.searchParams.delete('case');
-    window.history.replaceState(window.history.state, '', url);
     if (!selectedProject || !caseStudyRef.current) return;
     if (caseStudyRef.current.open) return;
     const dialog = caseStudyRef.current;
@@ -76,7 +125,7 @@ export const BuiltInReality: React.FC = () => {
     };
     dialog.showModal();
     document.body.style.overflow = 'hidden';
-  }, [selectedProject, locationReady]);
+  }, [selectedProject]);
 
   // Exhibition narrative data matching Kha Tran's exact projects
   const EXHIBITION_STORIES: Record<
@@ -137,6 +186,30 @@ export const BuiltInReality: React.FC = () => {
       results:
         'Delivered a browser-based interactive showcase. Device-specific FPS measurements are not included here.',
     },
+    'open-university-uk': {
+      problem:
+        'The university homepage and online learning tools needed accessible, consistent interfaces while learning-platform functionality moved from Drupal to Moodle.',
+      ownership:
+        'Built and maintained frontend modules with Vanilla JavaScript, jQuery, and Bootstrap. Integrated those interfaces with Drupal, adapted functionality for Moodle, and implemented accessibility improvements informed by WCAG guidance.',
+      architecture:
+        'Reusable frontend modules connected the university homepage and interactive learning tools to the existing PHP-based Drupal and Moodle platforms. Interface work covered navigation, responsive presentation, and accessible interaction.',
+      tradeoffs:
+        'Working within the existing CMS and LMS keeps the interface aligned with their authoring and learning workflows. A platform transition also requires adapting frontend behavior to each system without losing usability or accessibility.',
+      results:
+        'Delivered homepage and learning-tool interfaces, plus frontend changes supporting the Drupal-to-Moodle transition. The responsibilities listed below describe my contribution; this portfolio does not claim formal WCAG certification or a measured learning outcome.',
+    },
+    'socotec-platform': {
+      problem:
+        'The connected web frontend and Fliplet-based mobile application needed consistent, responsive interfaces as components and integrations changed.',
+      ownership:
+        'Built and maintained Vanilla JavaScript, jQuery, and Bootstrap 4 modules, implemented interface updates, and improved component usability. Collaborated with backend teams working with Umbraco CMS, Docker, PostgreSQL, and the Fliplet engine.',
+      architecture:
+        'Web frontend modules connected to the existing content and application services alongside a Fliplet-based mobile application. My work focused on interface behavior and integration with the backend teams, rather than ownership of the entire backend platform.',
+      tradeoffs:
+        'Using the existing web stack and Fliplet platform preserves established delivery workflows. Shared behavior and interface changes still need coordination across the web, mobile, and backend boundaries.',
+      results:
+        'Delivered responsive web modules, component-usability improvements, and mobile integration updates. The responsibilities below describe that delivery scope; no public usability study or performance benchmark is included here.',
+    },
   };
 
   return (
@@ -185,7 +258,7 @@ export const BuiltInReality: React.FC = () => {
                   </dl>
                   <div className="reality-project-technologies" aria-label="Project technologies">{project.technologies.slice(0, 4).map(technology => <span key={technology}>{technology}</span>)}{project.technologies.length > 4 && <span>+{project.technologies.length - 4} in case study</span>}</div>
                   <details className="reality-project-responsibilities"><summary>All responsibilities in the CV <span>{project.highlights.length}</span></summary><ul>{project.highlights.map(highlight => <li key={highlight}>{highlight}</li>)}</ul></details>
-                  <div className="reality-project-actions"><button type="button" onClick={() => setSelectedProject(project)} className="reality-case-button" aria-haspopup="dialog">Read case study<span><ArrowUpRight size={18} /></span></button>{project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer">Source code<ExternalLink size={13} /></a>}{project.domain && <a href={project.domain} target="_blank" rel="noopener noreferrer" title="Visit project website (opens in a new tab)">Visit website<ExternalLink size={13} /></a>}{project.relatedLinks?.map(link => <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label}<ExternalLink size={13} /></a>)}</div>
+                  <div className="reality-project-actions"><button type="button" onClick={() => openCaseStudy(project)} className="reality-case-button" aria-haspopup="dialog">Read case study<span><ArrowUpRight size={18} /></span></button>{project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener noreferrer">Source code<ExternalLink size={13} /></a>}{project.domain && <a href={project.domain} target="_blank" rel="noopener noreferrer" title="Visit project website (opens in a new tab)">Visit website<ExternalLink size={13} /></a>}{project.relatedLinks?.map(link => <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer">{link.label}<ExternalLink size={13} /></a>)}</div>
                 </div>
                 <div className="reality-project-art"><div className="reality-art-heading"><span>THE PROJECT, IN PERSPECTIVE</span><span>↗</span></div><ProjectSculpture index={index} discipline={PROJECT_EDITIONS[project.id].discipline} /><p className="reality-art-statement">{PROJECT_EDITIONS[project.id].label}</p></div>
               </article>;
@@ -201,7 +274,7 @@ export const BuiltInReality: React.FC = () => {
               ref={caseStudyRef}
               aria-labelledby="case-study-title"
               aria-modal="true"
-              onCancel={(event) => { event.preventDefault(); setSelectedProject(null); }}
+              onCancel={(event) => { event.preventDefault(); closeCaseStudy(); }}
               onKeyDown={(event) => {
                 if (event.key !== 'Tab') return;
                 const controls = event.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex="0"]');
@@ -231,7 +304,7 @@ export const BuiltInReality: React.FC = () => {
                 padding: '1.5rem',
               }}
               onClick={(event) => {
-                if (event.target === event.currentTarget) setSelectedProject(null);
+                if (event.target === event.currentTarget) closeCaseStudy();
               }}
             >
               <motion.div
@@ -261,7 +334,7 @@ export const BuiltInReality: React.FC = () => {
                     </h3>
                   </div>
                   <button
-                    onClick={() => setSelectedProject(null)}
+                    onClick={closeCaseStudy}
                     style={{
                       background: 'transparent',
                       border: '1px solid var(--border-arch)',
@@ -361,7 +434,7 @@ export const BuiltInReality: React.FC = () => {
 
                 {/* Close Button */}
                 <button
-                  onClick={() => setSelectedProject(null)}
+                  onClick={closeCaseStudy}
                   className="btn-arch btn-arch-patina"
                   style={{ width: '100%', padding: '0.75rem' }}
                 >

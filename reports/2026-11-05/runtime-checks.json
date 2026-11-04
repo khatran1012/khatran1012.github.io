@@ -1,0 +1,373 @@
+{
+  "cases": [
+    {
+      "title": "Theme Park & IoT Access",
+      "allSections": true,
+      "focusRestored": true
+    },
+    {
+      "title": "Marina Bay Sands Ticketing",
+      "allSections": true,
+      "focusRestored": true
+    },
+    {
+      "title": "Techcombank Banking Portal",
+      "allSections": true,
+      "focusRestored": true
+    },
+    {
+      "title": "Virtual Vietnam & NashTech",
+      "allSections": true,
+      "focusRestored": true
+    },
+    {
+      "title": "The UK Open University & OpenLearn Portal",
+      "allSections": true,
+      "focusRestored": true
+    },
+    {
+      "title": "Socotec Mobile & Web Application",
+      "allSections": true,
+      "focusRestored": true
+    }
+  ],
+  "history": {
+    "backCloses": true,
+    "forwardReopens": true,
+    "directAndLateHashPreserved": true,
+    "rapidBackForward": true
+  },
+  "responsive": [
+    {
+      "width": 360,
+      "overflow": false,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "header": [
+        {
+          "left": 24,
+          "right": 172.515625,
+          "width": 148.515625
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "width": 0
+        },
+        {
+          "left": 188.8125,
+          "right": 330,
+          "width": 141.1875
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "header": [
+        {
+          "left": 24,
+          "right": 194.8125,
+          "width": 170.8125
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "width": 0
+        },
+        {
+          "left": 218.8125,
+          "right": 360,
+          "width": 141.1875
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "overflow": false,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "header": [
+        {
+          "left": 24,
+          "right": 197.671875,
+          "width": 173.671875
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "width": 0
+        },
+        {
+          "left": 526.96875,
+          "right": 738,
+          "width": 211.03125
+        }
+      ]
+    },
+    {
+      "width": 900,
+      "overflow": false,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "header": [
+        {
+          "left": 24,
+          "right": 197.671875,
+          "width": 173.671875
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "width": 0
+        },
+        {
+          "left": 658.96875,
+          "right": 870,
+          "width": 211.03125
+        }
+      ]
+    },
+    {
+      "width": 1024,
+      "overflow": false,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "header": [
+        {
+          "left": 24,
+          "right": 197.671875,
+          "width": 173.671875
+        },
+        {
+          "left": 0,
+          "right": 0,
+          "width": 0
+        },
+        {
+          "left": 782.96875,
+          "right": 994,
+          "width": 211.03125
+        }
+      ]
+    },
+    {
+      "width": 1200,
+      "overflow": false,
+      "nav": {
+        "x": 265.28125,
+        "y": 19.421875,
+        "width": 677.671875,
+        "height": 31.15625,
+        "top": 19.421875,
+        "right": 942.953125,
+        "bottom": 50.578125,
+        "left": 265.28125
+      },
+      "header": [
+        {
+          "left": 24,
+          "right": 197.671875,
+          "width": 173.671875
+        },
+        {
+          "left": 265.28125,
+          "right": 942.953125,
+          "width": 677.671875
+        },
+        {
+          "left": 1010.5625,
+          "right": 1170,
+          "width": 159.4375
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "overflow": false,
+      "nav": {
+        "x": 305.28125,
+        "y": 19.421875,
+        "width": 677.671875,
+        "height": 31.15625,
+        "top": 19.421875,
+        "right": 982.953125,
+        "bottom": 50.578125,
+        "left": 305.28125
+      },
+      "header": [
+        {
+          "left": 31,
+          "right": 204.671875,
+          "width": 173.671875
+        },
+        {
+          "left": 305.28125,
+          "right": 982.953125,
+          "width": 677.671875
+        },
+        {
+          "left": 1083.5625,
+          "right": 1243,
+          "width": 159.4375
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "overflow": false,
+      "nav": {
+        "x": 385.28125,
+        "y": 19.421875,
+        "width": 677.671875,
+        "height": 31.15625,
+        "top": 19.421875,
+        "right": 1062.953125,
+        "bottom": 50.578125,
+        "left": 385.28125
+      },
+      "header": [
+        {
+          "left": 111,
+          "right": 284.671875,
+          "width": 173.671875
+        },
+        {
+          "left": 385.28125,
+          "right": 1062.953125,
+          "width": 677.671875
+        },
+        {
+          "left": 1163.5625,
+          "right": 1323,
+          "width": 159.4375
+        }
+      ]
+    }
+  ],
+  "menuEscape": true,
+  "hoverBorderOnly": true,
+  "threeD": {
+    "wheelDisarms": true,
+    "connectedKeyboard": true,
+    "controlsNoErrors": true,
+    "repeatedExitCanvasRemoved": true,
+    "profileDark": {
+      "dark:859.109375x552.5:1": {
+        "frames": 60,
+        "medianMs": 16.59999990463257,
+        "p95Ms": 18.90000009536743,
+        "calls": 127,
+        "triangles": 52178,
+        "dpr": 1
+      }
+    },
+    "profileLight": {
+      "light:859.109375x552.5:1": {
+        "frames": 60,
+        "medianMs": 16.5,
+        "p95Ms": 19.100000143051147,
+        "calls": 127,
+        "triangles": 52178,
+        "dpr": 1
+      }
+    },
+    "profileMobileEmulated": {
+      "dark:340x244.5:1": {
+        "frames": 60,
+        "medianMs": 16.699999809265137,
+        "p95Ms": 17.40000009536743,
+        "calls": 127,
+        "triangles": 52178,
+        "dpr": 1.25
+      }
+    }
+  },
+  "recovery": {
+    "expectedModuleFailures": 1,
+    "reloadRecovers": true,
+    "urlPreserved": true,
+    "intentConsumed": true,
+    "webglRemountRecovers": true
+  },
+  "mobileReduced": {
+    "connectedTouch": true,
+    "freePageScroll": true,
+    "themePersisted": true,
+    "footerScroll": {
+      "top": 0,
+      "behavior": "instant"
+    }
+  },
+  "noJavaScript": {
+    "nativeSelection": true,
+    "responsibilitiesExpand": true
+  },
+  "visualGeometry": [
+    {
+      "width": 390,
+      "theme": "dark",
+      "matching": true
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "matching": true
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "matching": true
+    },
+    {
+      "width": 1440,
+      "theme": "light",
+      "matching": true
+    }
+  ],
+  "simulationSelection": true,
+  "errors": [],
+  "failures": []
+}
