@@ -1,0 +1,55 @@
+.circuit-signal-board {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.circuit-copper { stroke: #090e17; stroke-width: 8; }
+.circuit-copper--edge { stroke: #6b7583; stroke-width: 2; opacity: 0.36; }
+.circuit-junction { fill: #0f2129; stroke: #8d7055; stroke-width: 1.35; opacity: 0.7; }
+.circuit-signal-board [data-dimmed='true'] { filter: brightness(0.42) saturate(0.6); }
+
+.circuit-comet path {
+  stroke: currentColor;
+  stroke-dasharray: var(--length) 150;
+  stroke-dashoffset: var(--length);
+  animation: circuit-burst var(--travel) cubic-bezier(0.22, 1, 0.36, 1) var(--delay) both;
+}
+.circuit-comet__wake { --length: 25; --peak: 0.38; stroke-width: 14; }
+.circuit-comet__tail { --length: 19; --peak: 0.35; stroke-width: 4.2; }
+.circuit-comet__filament { --length: 11; --peak: 0.92; stroke-width: 2.5; }
+.circuit-comet .circuit-comet__head { --length: 1.15; --peak: 1; stroke: #fff; stroke-width: 4; filter: drop-shadow(0 0 3px currentColor); }
+
+@keyframes circuit-burst {
+  from { stroke-dashoffset: var(--length); opacity: 0; }
+  10%, 100% { opacity: var(--peak); }
+  to { stroke-dashoffset: calc(var(--length) - 100); }
+}
+
+.circuit-ribbon { mix-blend-mode: screen; }
+.circuit-ribbon__vapor { stroke-width: 31; opacity: 0.68; }
+.circuit-ribbon__silk { stroke-width: 6; opacity: 0.37; filter: blur(1px); }
+.circuit-ribbon__thread {
+  stroke-width: 1.7;
+  stroke-dasharray: 12 2 3 1 8 3 17 4;
+  animation: ribbon-flow 4.8s linear infinite;
+}
+.circuit-ribbon:nth-child(even) .circuit-ribbon__thread { animation-direction: reverse; animation-duration: 6.3s; }
+.circuit-ribbon:nth-child(odd) { animation: ribbon-swell 6s ease-in-out infinite alternate; }
+.circuit-ribbon:nth-child(even) { animation: ribbon-swell 7s -2s ease-in-out infinite alternate-reverse; }
+@keyframes ribbon-flow { to { stroke-dashoffset: -100; } }
+@keyframes ribbon-swell { from { opacity: 0.55; } to { opacity: 1; } }
+
+.circuit-jack path:first-child { fill: #0a1016; stroke: #424a51; stroke-width: 1.4; }
+.circuit-jack path:last-child { stroke: currentColor; stroke-width: 0.8; opacity: 0.62; }
+
+@media (prefers-reduced-motion: reduce) {
+  .circuit-signal-board * { animation: none; }
+  .circuit-comet { display: none; }
+}

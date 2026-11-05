@@ -1,0 +1,142 @@
+.cyber-inspector-trace,
+.cyber-inspector-wait {
+  display: none;
+}
+
+.cyber-decode {
+  display: inline-block;
+  max-width: 100%;
+  position: relative;
+}
+.cyber-decode-label { color: transparent; }
+.cyber-decode-cipher {
+  position: absolute;
+  inset: 0;
+  color: var(--module-color);
+  text-shadow: 0 0 8px var(--module-color);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cyber-module-inspector {
+    --inlet-position: 50%;
+  }
+  .cyber-module-inspector :is(.cyber-readout-copy, .cyber-default-readout) {
+    transition: opacity 110ms ease-out, filter 110ms ease-out;
+  }
+  [data-phase='transmitting'] .cyber-module-inspector :is(.cyber-readout-copy, .cyber-default-readout) {
+    opacity: 0.2;
+    filter: blur(4px);
+  }
+  [data-phase='transmitting'] .cyber-inspector-wait {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    inset: var(--inlet-position) 0 auto;
+    transform: translateY(-50%);
+    text-align: center;
+    color: var(--module-color);
+    font: 600 0.64rem/1.4 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 12px var(--module-color);
+  }
+  [data-phase='opening'] .cyber-selection-banner {
+    animation: cyber-panel-open 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes cyber-panel-open {
+    from { clip-path: inset(var(--inlet-position) 0 calc(100% - var(--inlet-position)) round 10px); }
+    to { clip-path: inset(0 round 10px); }
+  }
+
+  [data-phase='revealing'] .cyber-module-inspector::before,
+  [data-phase='revealing'] .cyber-module-inspector::after {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    left: 1px;
+    right: 1px;
+    top: var(--inlet-position);
+    height: 1px;
+    background: linear-gradient(90deg, var(--module-color), transparent);
+    box-shadow: 0 0 10px var(--module-color);
+    animation: cyber-panel-scan 250ms ease-out both;
+  }
+  [data-phase='revealing'] .cyber-module-inspector::before { --scan-end: 0%; }
+  [data-phase='revealing'] .cyber-module-inspector::after { --scan-end: 100%; }
+  @keyframes cyber-panel-scan {
+    from { opacity: 0.85; }
+    to { top: var(--scan-end); opacity: 0; }
+  }
+
+  :is([data-phase='opening'], [data-phase='revealing']) .cyber-inspector-trace {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .cyber-inspector-trace path {
+    fill: none;
+    stroke: var(--module-color);
+    stroke-width: 1.5;
+    stroke-dasharray: 100;
+    filter: drop-shadow(0 0 3px var(--module-color));
+    animation: cyber-border-trace 300ms ease-out both;
+  }
+  @keyframes cyber-border-trace {
+    0% { stroke-dashoffset: 100; opacity: 1; }
+    70% { stroke-dashoffset: 0; opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 0; }
+  }
+
+  :is([data-phase='opening'], [data-phase='revealing']) .cyber-readout-copy > * {
+    animation: cyber-data-reveal 120ms ease-out var(--reveal-delay, 35ms) both;
+  }
+  .cyber-readout-copy > .cyber-readout-head { --reveal-delay: 60ms; }
+  .cyber-readout-copy > .cyber-readout-desc { --reveal-delay: 100ms; }
+  .cyber-readout-copy > .cyber-readout-techs { --reveal-delay: 135ms; }
+  .cyber-readout-copy > .cyber-readout-specs { --reveal-delay: 165ms; }
+  .cyber-readout-copy > .cyber-readout-link { --reveal-delay: 190ms; }
+  :is([data-phase='opening'], [data-phase='revealing']) .cyber-readout-techs > span {
+    animation: cyber-tech-latch 105ms ease-out calc(90ms + var(--tech-index) * 35ms) both;
+  }
+  @keyframes cyber-data-reveal {
+    from { opacity: 0; transform: translateY(6px); filter: blur(4px); }
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  @keyframes cyber-tech-latch {
+    0% { opacity: 0; scale: 0.95; }
+    55% { opacity: 1; border-color: var(--module-color); }
+    100% { opacity: 1; scale: 1; }
+  }
+
+  @media (max-width: 759px) {
+    [data-phase='transmitting'] .cyber-inspector-wait { inset: 0.3rem 0 auto; }
+    [data-phase='transmitting'] .cyber-module-inspector:has(.cyber-default-readout) .cyber-inspector-wait {
+      position: relative;
+      inset: auto;
+      transform: none;
+      padding: 0.35rem 0;
+    }
+    [data-phase='opening'] .cyber-selection-banner { animation-name: cyber-panel-open-compact; }
+    @keyframes cyber-panel-open-compact {
+      from { clip-path: circle(0 at var(--inlet-position) 0); }
+      to { clip-path: circle(115% at 50% 50%); }
+    }
+    [data-phase='revealing'] .cyber-module-inspector::before,
+    [data-phase='revealing'] .cyber-module-inspector::after {
+      inset: 1px auto 1px var(--inlet-position);
+      width: 1px;
+      height: auto;
+      background: linear-gradient(var(--module-color), transparent);
+      animation-name: cyber-panel-scan-compact;
+    }
+    @keyframes cyber-panel-scan-compact {
+      from { opacity: 0.85; }
+      to { left: var(--scan-end); opacity: 0; }
+    }
+  }
+}

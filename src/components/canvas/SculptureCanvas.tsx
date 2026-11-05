@@ -1,23 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NanoCircuitBackdrop } from './NanoCircuitBackdrop';
 import {
-  RotateCcw,
+  CircuitSignalBoard,
+  CIRCUIT_DESKTOP_EXIT_Y,
+  CIRCUIT_MOBILE_EXIT_X,
+  CIRCUIT_CHARGE_MS,
+  CIRCUIT_BURST_MS,
+} from './CircuitSignalBoard';
+import { inspectorTracePaths, SignalDecode } from './InspectorSignal';
+import { MODULE_LIGHTS, MODULE_POSITIONS, type SystemModuleId } from './systemModuleLayout';
+import { CircuitParticles } from './CircuitParticles';
+import { ModuleEnergy } from './ModuleEnergy';
+import './SculptureModules.css';
+import {
   ExternalLink,
   CheckCircle2,
-  Zap,
   X,
 } from 'lucide-react';
 
 export interface SystemNode {
-  id: 'core' | 'frontend' | 'backend' | 'infra' | 'data';
+  id: SystemModuleId;
   number: string;
   name: string;
   subTitle: string;
   category: string;
-  xPercent: number;
-  yPercent: number;
   color: 'cyan' | 'amber';
-  hexColor: string;
   badgeLabel: string;
   technologies: string[];
   specs: string[];
@@ -32,10 +39,7 @@ const SYSTEM_NODES: SystemNode[] = [
     name: 'SYSTEM CORE',
     subTitle: 'Architecture & Engineering',
     category: 'CENTRAL PROCESSOR',
-    xPercent: 50,
-    yPercent: 49,
     color: 'cyan',
-    hexColor: '#38efd8',
     badgeLabel: 'KT CHIP',
     technologies: ['Architecture', 'Engineering', 'Problem Solving', 'High Concurrency'],
     specs: ['Central Conduit Nexus', 'Fault-Tolerant Dispatch', 'Single Source of Truth'],
@@ -48,10 +52,7 @@ const SYSTEM_NODES: SystemNode[] = [
     name: 'FRONTEND',
     subTitle: 'React / TypeScript',
     category: 'DETERMINISTIC UI',
-    xPercent: 22,
-    yPercent: 24,
     color: 'cyan',
-    hexColor: '#00f5d4',
     badgeLabel: 'REACT / TS',
     technologies: ['React', 'TypeScript', 'UI/UX Performance', 'State Management'],
     specs: ['Explicit application state', 'Reusable UI components', 'Keyboard and accessible interactions'],
@@ -64,10 +65,7 @@ const SYSTEM_NODES: SystemNode[] = [
     name: 'BACKEND',
     subTitle: 'Golang / API Design',
     category: 'DISTRIBUTED SERVICES',
-    xPercent: 78,
-    yPercent: 24,
     color: 'amber',
-    hexColor: '#ffaa22',
     badgeLabel: 'GOLANG GIN',
     technologies: ['Golang Gin', 'API Contracts', 'Microservices', 'Concurrency Channels'],
     specs: ['Concurrent goroutine workers', 'Validated API contracts', 'Transactional service boundaries'],
@@ -80,10 +78,7 @@ const SYSTEM_NODES: SystemNode[] = [
     name: 'INFRASTRUCTURE',
     subTitle: 'Cloud / DevOps',
     category: 'EDGE & CLUSTERS',
-    xPercent: 25,
-    yPercent: 75,
     color: 'amber',
-    hexColor: '#ff9e2c',
     badgeLabel: 'K8S & EDGE',
     technologies: ['Cloud & Edge Gateways', 'Docker / Kubernetes', 'Monitoring / CI/CD', 'IoT Turnstiles'],
     specs: ['Offline-First failover', 'Automated CI/CD pipelines', 'Hardware relay interfacing'],
@@ -96,10 +91,7 @@ const SYSTEM_NODES: SystemNode[] = [
     name: 'DATA',
     subTitle: 'PostgreSQL / Redis',
     category: 'TRANSACTIONAL INTEGRITY',
-    xPercent: 75,
-    yPercent: 75,
     color: 'cyan',
-    hexColor: '#26e8db',
     badgeLabel: 'POSTGRES / REDIS',
     technologies: ['PostgreSQL', 'Redis Distributed Lock', 'Data Pipeline', 'Caching & Sync'],
     specs: ['Row-level transaction locks', 'Coordinated ticket validation', 'Deferred event synchronization'],
@@ -108,133 +100,128 @@ const SYSTEM_NODES: SystemNode[] = [
   },
 ];
 
-const MODULE_SIZES = {
-  core: '(min-width: 1520px) 166px, (min-width: 1280px) calc(16.07vw - 78px), (min-width: 760px) calc(27vw - 84px), (min-width: 601px) calc(27vw - 14px), calc(38vw - 19px)',
-  other: '(min-width: 1520px) 136px, (min-width: 1280px) calc(13.1vw - 64px), (min-width: 760px) calc(22vw - 68px), (min-width: 601px) calc(22vw - 11px), calc(32vw - 16px)',
-};
-
-const SIGNAL_CHARGE_MS = 100;
-const SIGNAL_FLIGHT_MS = 560;
-
-interface SelectionRoute {
-  nodeId: string;
-  run: number;
-  path: string;
-  x: number;
-  y: number;
-  endX: number;
-  endY: number;
-}
+const BRIDGE_TRAVEL_MS = 65;
+const BRIDGE_START_MS = CIRCUIT_CHARGE_MS + CIRCUIT_BURST_MS;
+const SIGNAL_ARRIVAL_MS = BRIDGE_START_MS + BRIDGE_TRAVEL_MS;
+const SEQUENCE_END_MS = 790;
+type SignalPhase = 'idle' | 'transmitting' | 'opening' | 'revealing';
 
 export const SculptureCanvas: React.FC = () => {
-  const [selection, setSelection] = useState<{ nodeId: string; run: number; arrived: boolean; animate: boolean } | null>(null);
-  const [highlightedId, setHighlightedId] = useState<string | null>(null);
-  const [neonActive, setNeonActive] = useState(true);
-  const [route, setRoute] = useState<SelectionRoute | null>(null);
+  const [activeNodeId, setActiveNodeId] = useState<SystemModuleId | null>(null);
+  const [displayedId, setDisplayedId] = useState<SystemModuleId | null>(null);
+  const [phase, setPhase] = useState<SignalPhase>('idle');
+  const [compact, setCompact] = useState(false);
   const exhibitRef = useRef<HTMLDivElement>(null);
-  const dockRef = useRef<HTMLSpanElement>(null);
   const depthRef = useRef<HTMLDivElement>(null);
-  const frame = useRef(0);
-  const pointer = useRef({ x: 0, y: 0 });
-  const activeNodeId = selection?.nodeId ?? null;
-  const litNodeId = highlightedId ?? activeNodeId;
-  const selectedNode = SYSTEM_NODES.find(node => node.id === activeNodeId);
-  const activeRoute = route?.nodeId === selection?.nodeId && route?.run === selection?.run ? route : null;
+  const inspectorRef = useRef<HTMLElement>(null);
+  const bridgeRef = useRef<HTMLDivElement>(null);
+  const traceRef = useRef<SVGSVGElement>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const sequenceTimers = useRef<number[]>([]);
+  const displayedNode = SYSTEM_NODES.find(node => node.id === displayedId);
+  const inspectorOpen = activeNodeId !== null;
+  const transmitting = phase === 'transmitting';
+  const revealing = phase === 'opening' || phase === 'revealing';
 
+  useEffect(() => () => sequenceTimers.current.forEach(timer => window.clearTimeout(timer)), []);
+
+  useEffect(() => {
+    const query = matchMedia('(max-width: 759px)');
+    const update = () => setCompact(query.matches);
+    update();
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+
+  // The flex connector only spans the chassis edge and the inspector inlet.
   useEffect(() => {
     const exhibit = exhibitRef.current;
     const viewport = depthRef.current;
-    const dock = dockRef.current;
-    const source = exhibit?.querySelector<HTMLButtonElement>(`[data-node="${selection?.nodeId}"]`);
-    if (!exhibit || !viewport || !dock || !source) {
-      setRoute(null);
-      return;
-    }
+    const inspector = inspectorRef.current;
+    const bridge = bridgeRef.current;
+    if (!exhibit || !viewport || !inspector || !bridge) return;
+
     const measure = () => {
-      const bounds = exhibit.getBoundingClientRect();
-      const origin = (source.querySelector('.cyber-module-socket') ?? source).getBoundingClientRect();
+      const origin = exhibit.getBoundingClientRect();
       const stage = viewport.getBoundingClientRect();
-      const destination = dock.getBoundingClientRect();
-      const x = origin.left + origin.width / 2 - bounds.left;
-      const y = origin.top + origin.height / 2 - bounds.top;
-      const endX = destination.left + destination.width / 2 - bounds.left;
-      const endY = destination.top + destination.height / 2 - bounds.top;
-      const bend = Math.max(45, Math.abs(endX - x) * 0.42);
-      exhibit.style.setProperty('--hero-stage-top', `${stage.top - bounds.top}px`);
-      exhibit.style.setProperty('--hero-stage-height', `${stage.height}px`);
-      setRoute({ nodeId: selection!.nodeId, run: selection!.run, x, y, endX, endY,
-        path: `M ${x.toFixed(1)} ${y.toFixed(1)} C ${(x + bend).toFixed(1)} ${y.toFixed(1)} ${(endX - bend).toFixed(1)} ${endY.toFixed(1)} ${endX.toFixed(1)} ${endY.toFixed(1)}` });
+      const inlet = inspector.getBoundingClientRect();
+      const x = compact ? stage.left + stage.width * CIRCUIT_MOBILE_EXIT_X : stage.right;
+      const y = compact ? stage.bottom : stage.top + stage.height * CIRCUIT_DESKTOP_EXIT_Y;
+      const length = compact ? inlet.top - y : inlet.left - x;
+      bridge.style.setProperty('--bridge-x', `${x - origin.left}px`);
+      bridge.style.setProperty('--bridge-y', `${y - origin.top}px`);
+      bridge.style.setProperty('--bridge-length', `${Math.max(0, length)}px`);
+      bridge.dataset.positioned = String(length > 0);
+
+      if (!traceRef.current || inlet.height < 20 || inlet.width < 20) return;
+      const offset = compact ? x - inlet.left : y - inlet.top;
+      const edge = compact ? inlet.width : inlet.height;
+      const port = Math.max(10, Math.min(edge - 10, offset));
+      const paths = inspectorTracePaths(inlet.width, inlet.height, port, compact);
+      inspector.style.setProperty('--inlet-position', `${port}px`);
+      traceRef.current.querySelectorAll('path').forEach((path, index) => path.setAttribute('d', paths[index]));
     };
+
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(exhibit);
     observer.observe(viewport);
-    if (dock.parentElement) observer.observe(dock.parentElement);
+    observer.observe(inspector);
+    if (viewport.parentElement) observer.observe(viewport.parentElement);
     return () => observer.disconnect();
-  }, [selection?.nodeId, selection?.run]);
+  }, [compact, inspectorOpen, displayedId]);
 
-  useEffect(() => () => cancelAnimationFrame(frame.current), []);
-  useEffect(() => {
-    const preference = matchMedia('(prefers-reduced-motion: reduce)');
-    const finish = () => {
-      if (preference.matches) setSelection(current => current ? { ...current, arrived: true, animate: false } : null);
-    };
-    preference.addEventListener('change', finish);
-    return () => preference.removeEventListener('change', finish);
-  }, []);
-
-  // Keep the information available even if a decorative animation is interrupted.
-  useEffect(() => {
-    if (!selection || selection.arrived) return;
-    const { nodeId, run } = selection;
-    const fallback = window.setTimeout(() => {
-      setSelection(current => current?.nodeId === nodeId && current.run === run
-        ? { ...current, arrived: true } : current);
-    }, SIGNAL_CHARGE_MS + SIGNAL_FLIGHT_MS + 350);
-    return () => window.clearTimeout(fallback);
-  }, [selection]);
-
-  const selectNode = (nodeId: string) => {
-    updateDepth(0, 0);
-    const animate = neonActive && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setSelection(current => ({ nodeId, run: (current?.run ?? 0) + 1, arrived: !animate, animate }));
+  const stopSequence = () => {
+    sequenceTimers.current.forEach(timer => window.clearTimeout(timer));
+    sequenceTimers.current = [];
   };
 
-  const updateDepth = (x: number, y: number) => {
-    pointer.current = { x, y };
-    if (frame.current) return;
-    frame.current = requestAnimationFrame(() => {
-      depthRef.current?.style.setProperty('--hero-x', pointer.current.x.toFixed(3));
-      depthRef.current?.style.setProperty('--hero-y', pointer.current.y.toFixed(3));
-      frame.current = 0;
-    });
+  const selectNode = (requestedId: SystemModuleId | null, trigger?: HTMLButtonElement) => {
+    if (trigger) triggerRef.current = trigger;
+    const nodeId = requestedId === activeNodeId ? null : requestedId;
+    if (nodeId === activeNodeId) return;
+    stopSequence();
+    setActiveNodeId(nodeId);
+
+    if (!nodeId || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setDisplayedId(nodeId);
+      setPhase('idle');
+      return;
+    }
+
+    setPhase('transmitting');
+    sequenceTimers.current = [
+      window.setTimeout(() => {
+        setDisplayedId(nodeId);
+        setPhase(displayedId ? 'revealing' : 'opening');
+      }, SIGNAL_ARRIVAL_MS),
+      window.setTimeout(() => setPhase('idle'), SEQUENCE_END_MS),
+    ];
   };
 
-  const resetView = () => {
-    setSelection(null);
-    setHighlightedId(null);
-    updateDepth(0, 0);
+  const closeInspector = () => {
+    selectNode(null);
+    triggerRef.current?.focus({ preventScroll: !compact });
   };
 
   return (
-    <div ref={exhibitRef} className={`cyber-exhibit ${neonActive ? '' : 'neon-paused'} ${selection && !selection.arrived ? 'is-routing' : ''}`}
-      data-selected={Boolean(selection)} data-animate={selection?.animate ?? false}
-      style={{ '--signal-charge': `${SIGNAL_CHARGE_MS}ms`, '--signal-flight': `${SIGNAL_FLIGHT_MS}ms` } as React.CSSProperties} onKeyDown={event => {
-      if (event.key === 'Escape') resetView();
+    <div ref={exhibitRef} className="cyber-exhibit"
+      data-selected={inspectorOpen} data-phase={phase}
+      style={{ '--module-color': MODULE_LIGHTS[activeNodeId ?? 'core'] } as React.CSSProperties}
+      onKeyDown={event => {
+      if (event.key === 'Escape' && inspectorOpen) closeInspector();
     }}>
       <div className="cyber-core-viewer" role="region" aria-label="Interactive System Architecture Exhibit">
         <div className="cyber-core-header">
           <div className="cyber-core-title">
             <span className="cyber-status-led" />
             <span className="cyber-title-main">KT-CORE // SYSTEM ANATOMY</span>
-            <span className="cyber-title-status">{neonActive ? '● LIVE LED CONDUITS' : '● SIGNALS PAUSED'}</span>
+            <span className="cyber-title-status">● SIGNAL / PULSE</span>
           </div>
           <div className="cyber-node-tabs" role="group" aria-label="Select architecture module">
-            <button type="button" className={`cyber-tab-btn ${activeNodeId === null ? 'active' : ''}`}
-              onClick={resetView} aria-pressed={activeNodeId === null}>ALL NODES</button>
             {SYSTEM_NODES.map(node => (
               <button key={node.id} type="button" className={`cyber-tab-btn ${activeNodeId === node.id ? 'active' : ''} ${node.color}`}
-                onClick={() => selectNode(node.id)} aria-pressed={activeNodeId === node.id}
+                onClick={event => selectNode(node.id, event.currentTarget)} aria-pressed={activeNodeId === node.id}
                 aria-controls="hero-module-detail" title={`${node.number} ${node.name} — ${node.subTitle}`}>
                 <span className="cyber-tab-num">{node.number}</span> {node.name.split(' ')[0]}
               </button>
@@ -242,47 +229,29 @@ export const SculptureCanvas: React.FC = () => {
           </div>
         </div>
 
-        <div ref={depthRef} className="cyber-core-viewport" onPointerMove={event => {
-          if (event.pointerType !== 'mouse' || selection || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-          const bounds = event.currentTarget.getBoundingClientRect();
-          updateDepth((event.clientX - bounds.left) / bounds.width * 2 - 1, (event.clientY - bounds.top) / bounds.height * 2 - 1);
-        }} onPointerLeave={() => { if (!selection) updateDepth(0, 0); }}>
+        <div ref={depthRef} className="cyber-core-viewport">
           <NanoCircuitBackdrop />
+          <CircuitSignalBoard selectedId={activeNodeId} transmitting={transmitting} mobile={compact} />
+          <div className="cyber-scene-mist" aria-hidden="true" />
           <div className="cyber-depth-rig">
-            <svg className="cyber-module-connections" viewBox="0 0 1000 760" preserveAspectRatio="none" aria-hidden="true">
-              {SYSTEM_NODES.filter(node => node.id !== 'core').map(node => {
-                const x = node.xPercent * 10;
-                const y = node.yPercent * 7.6;
-                const path = `M 500 372 C 500 ${y} ${x} 372 ${x} ${y}`;
-                return <g key={node.id} className={`cyber-connection ${litNodeId && litNodeId !== 'core' && litNodeId !== node.id ? 'is-dimmed' : ''}`}
-                  style={{ color: node.hexColor }}>
-                  <path d={path} strokeWidth="9" opacity="0.1" />
-                  <path d={path} strokeWidth="1.5" opacity="0.85" />
-                  <path d={path} pathLength="1" className="cyber-connection-packet" strokeWidth="3" strokeDasharray="0.05 0.95" />
-                  <circle cx={x} cy={y} r="4" fill="currentColor" />
-                </g>;
-              })}
-            </svg>
             {SYSTEM_NODES.map(node => (
               <button key={node.id} type="button" data-node={node.id}
                 className={`cyber-module ${node.color} ${node.id === 'core' ? 'is-core' : ''} ${activeNodeId === node.id ? 'is-selected' : ''}`}
-                style={{ left: `${node.xPercent}%`, top: `${node.yPercent}%`, '--module-color': node.hexColor } as React.CSSProperties}
+                style={{ left: `${MODULE_POSITIONS[node.id].x}%`, top: `${MODULE_POSITIONS[node.id].y}%`,
+                  '--module-color': MODULE_LIGHTS[node.id] } as React.CSSProperties}
                 title={`${node.name} — ${node.subTitle}. Click to inspect.`}
                 aria-pressed={activeNodeId === node.id} aria-controls="hero-module-detail"
-                onClick={() => selectNode(node.id)}
-                onPointerEnter={event => { if (event.pointerType === 'mouse') setHighlightedId(node.id); }}
-                onPointerLeave={() => setHighlightedId(null)}
-                onFocus={() => setHighlightedId(node.id)} onBlur={() => setHighlightedId(null)}>
+                onClick={event => selectNode(node.id, event.currentTarget)}>
                 <span className="cyber-module-socket" aria-hidden="true" />
+                {transmitting && activeNodeId === node.id && <span className="cyber-module-shockwave" aria-hidden="true" />}
+                <ModuleEnergy id={node.id} rear />
                 <picture className="cyber-module-art">
-                  <source type="image/avif" srcSet={`./hero-modules/${node.id}-192.avif 192w, ./hero-modules/${node.id}-256.avif 256w, ./hero-modules/${node.id}-384.avif 384w, ./hero-modules/${node.id}.avif 768w`}
-                    sizes={MODULE_SIZES[node.id === 'core' ? 'core' : 'other']} />
-                  <source type="image/webp" srcSet={`./hero-modules/${node.id}-192.webp 192w, ./hero-modules/${node.id}-256.webp 256w, ./hero-modules/${node.id}-384.webp 384w, ./hero-modules/${node.id}.webp 768w`}
-                    sizes={MODULE_SIZES[node.id === 'core' ? 'core' : 'other']} />
-                  <img src={`./hero-modules/${node.id}.webp`} width="768" height="768" alt=""
-                    loading="eager" {...{ fetchpriority: node.id === 'core' ? 'high' : 'auto' }} decoding="async" draggable={false}
-                    onLoad={event => event.currentTarget.closest<HTMLButtonElement>('.cyber-module')?.style.setProperty('--module-texture', `url("${event.currentTarget.currentSrc}")`)} />
+                  <source type="image/avif" srcSet={`./hero-modules/${node.id}-384.avif 1x, ./hero-modules/${node.id}.avif 2x`} />
+                  <img src={`./hero-modules/${node.id}-384.webp`} srcSet={`./hero-modules/${node.id}.webp 2x`}
+                    width="768" height="768" alt="" decoding="async" draggable={false}
+                    {...{ fetchpriority: node.id === 'core' ? 'high' : 'auto' }} />
                 </picture>
+                <ModuleEnergy id={node.id} />
                 <span className="cyber-module-label">
                   <span className="cyber-module-number">{node.number}</span>{' '}
                   <strong>{node.name}</strong>
@@ -291,75 +260,65 @@ export const SculptureCanvas: React.FC = () => {
               </button>
             ))}
           </div>
-          <span className="cyber-depth-label">NANO FABRIC / FIVE CONNECTED MODULES</span>
-          <span className="cyber-scene-hint">HOVER TO ILLUMINATE · CLICK TO INSPECT</span>
+          <CircuitParticles />
+          <span className="cyber-depth-label">NANO FABRIC / 05 MODULES</span>
+          <span className="cyber-scene-hint">HOVER TO ILLUMINATE / SELECT TO INSPECT</span>
         </div>
 
         <div className="cyber-core-footer">
-          <div className="cyber-footer-actions">
-            <button type="button" className={`cyber-action-btn ${neonActive ? 'active' : ''}`}
-              onClick={() => {
-                if (neonActive) setSelection(current => current ? { ...current, arrived: true, animate: false } : null);
-                setNeonActive(value => !value);
-              }} aria-pressed={neonActive}>
-              <Zap size={14} /><span>{neonActive ? 'LED Neon: ON' : 'LED Neon: OFF'}</span>
-            </button>
-            <button type="button" className="cyber-action-btn" onClick={resetView}>
-              <RotateCcw size={14} /><span>Reset</span>
-            </button>
-          </div>
+          <span className="cyber-signal-caption">Select a module to inspect. Select it again to close.</span>
         </div>
       </div>
-      <aside className="cyber-module-inspector" aria-label="Module information" data-open={Boolean(selection?.arrived)}
-        style={{ '--module-color': selectedNode?.hexColor ?? '#38efd8' } as React.CSSProperties}>
-        <span key={selection?.run} ref={dockRef} className="cyber-inspector-port" aria-hidden="true"><span /></span>
-          <div id="hero-module-detail" className="cyber-footer-readout" aria-live="polite" aria-atomic="true"
-            aria-busy={selection !== null && !selection.arrived}>
-            {SYSTEM_NODES.filter(node => node.id === activeNodeId).map(node => (
-              <div key={`${node.id}:${selection?.run}`} className="cyber-node-readout cyber-selection-banner" data-selected-module={node.id}
-                aria-hidden={!selection?.arrived}
-                style={{ '--module-color': node.hexColor } as React.CSSProperties}>
-                <button type="button" className="cyber-inspector-close" onClick={resetView} aria-label="Close module information"><X size={16} /></button>
-                <div className="cyber-readout-connection" aria-hidden="true"><span>MODULE / {node.number}</span><span><i />LINK ESTABLISHED</span></div>
-                <span className="cyber-readout-eyebrow">{node.category}</span>
+      {inspectorOpen && (
+        <div ref={bridgeRef} className="cyber-inspector-bridge" aria-hidden="true"
+          style={{ '--bridge-delay': `${BRIDGE_START_MS}ms`, '--bridge-travel': `${BRIDGE_TRAVEL_MS}ms` } as React.CSSProperties}>
+          <span className="cyber-bridge-channel">
+            {transmitting && <span key={activeNodeId} className="cyber-bridge-pulse" />}
+          </span>
+          {revealing && <span className="cyber-bridge-receiver" />}
+        </div>
+      )}
+      <aside ref={inspectorRef} className="cyber-module-inspector" aria-label="Module information" data-open={inspectorOpen}>
+        {inspectorOpen && (
+          <svg ref={traceRef} className="cyber-inspector-trace" aria-hidden="true" focusable="false">
+            <path pathLength="100" />
+            <path pathLength="100" />
+          </svg>
+        )}
+        {transmitting && <span className="cyber-inspector-wait" aria-hidden="true">RECEIVING SIGNAL</span>}
+        <div id="hero-module-detail" className="cyber-footer-readout" aria-live="polite" aria-atomic="true" aria-busy={transmitting}>
+          {displayedNode ? (
+            <div key={displayedNode.id} className="cyber-node-readout cyber-selection-banner" data-selected-module={displayedNode.id}>
+              <button type="button" className="cyber-inspector-close" onClick={closeInspector} aria-label="Close module information"><X size={16} /></button>
+              <div className="cyber-readout-copy">
+                <div className="cyber-readout-connection" aria-hidden="true"><span>MODULE / {displayedNode.number}</span><span><i />MODULE ACTIVE</span></div>
+                <span className="cyber-readout-eyebrow"><SignalDecode text={displayedNode.category} animate={revealing} /></span>
                 <div className="cyber-readout-head">
-                  <span className={`cyber-readout-pill ${node.color}`}>{node.number} // {node.name}</span>
-                  <span className="cyber-readout-sub">{node.subTitle}</span>
+                  <span className={`cyber-readout-pill ${displayedNode.color}`}>
+                    <SignalDecode text={`${displayedNode.number} // ${displayedNode.name}`} animate={revealing} />
+                  </span>
+                  <span className="cyber-readout-sub">{displayedNode.subTitle}</span>
                 </div>
-                <p className="cyber-readout-desc">{node.description}</p>
-                <div className="cyber-readout-techs">{node.technologies.map(tech => <span key={tech}>{tech}</span>)}</div>
-                <div className="cyber-readout-specs">{node.specs.map(spec => (
-                  <span key={spec} className="cyber-spec-item"><CheckCircle2 size={12} color={node.hexColor} />{spec}</span>
+                <p className="cyber-readout-desc">{displayedNode.description}</p>
+                <div className="cyber-readout-techs">{displayedNode.technologies.map((tech, index) => (
+                  <span key={tech} style={{ '--tech-index': index } as React.CSSProperties}>{tech}</span>
                 ))}</div>
-                <a href={node.targetChapter} className="cyber-readout-link">Inspect in Exhibit <ExternalLink size={12} /></a>
+                <div className="cyber-readout-specs">{displayedNode.specs.map(spec => (
+                  <span key={spec} className="cyber-spec-item"><CheckCircle2 size={12} color={MODULE_LIGHTS[displayedNode.id]} />{spec}</span>
+                ))}</div>
+                <a href={displayedNode.targetChapter} className="cyber-readout-link">Inspect in Exhibit <ExternalLink size={12} /></a>
               </div>
-            ))}
-            {selectedNode && !selection?.arrived && <p className="cyber-link-pending"><span aria-hidden="true" />Connecting to {selectedNode.name}…</p>}
-            {activeNodeId === null && <div className="cyber-default-readout">
+            </div>
+          ) : (
+            <div className="cyber-default-readout">
               <span className="cyber-readout-eyebrow">KT / ARCHITECTURE EXHIBIT</span>
               <strong>One machine. Five connected disciplines.</strong>
               <p>Explore the modules behind the work: interfaces, services, infrastructure and data, connected through the system core.</p>
               <p className="cyber-readout-instruction">Select a module to inspect its role, technologies and engineering decisions.</p>
-            </div>}
-          </div>
+            </div>
+          )}
+        </div>
       </aside>
-      {selectedNode && selection && activeRoute && <React.Fragment key={`${selectedNode.id}:${selection.run}`}>
-        <svg className={`cyber-selection-route ${selection.arrived ? 'is-complete' : ''}`} aria-hidden="true">
-          <g className="cyber-connection cyber-selection-signal" data-signal-node={selectedNode.id} style={{ color: selectedNode.hexColor }}>
-            <circle cx={activeRoute.x} cy={activeRoute.y} r="8" className="cyber-signal-origin" />
-            <path d={activeRoute.path} className="cyber-selection-track" />
-            <path d={activeRoute.path} pathLength="1" className="cyber-selection-draw cyber-selection-glow" />
-            <path d={activeRoute.path} pathLength="1" className="cyber-selection-draw" />
-            <path d={activeRoute.path} pathLength="1" className="cyber-selection-packet cyber-selection-packet-halo" />
-            <path d={activeRoute.path} pathLength="1" className="cyber-selection-packet" onAnimationEnd={event => {
-              if (event.animationName !== 'hero-signal-travel') return;
-              setSelection(current => current?.nodeId === selectedNode.id && current.run === selection.run
-                ? { ...current, arrived: true } : current);
-            }} />
-            <circle cx={activeRoute.endX} cy={activeRoute.endY} r="3" className="cyber-signal-terminal" />
-          </g>
-        </svg>
-      </React.Fragment>}
     </div>
   );
 };

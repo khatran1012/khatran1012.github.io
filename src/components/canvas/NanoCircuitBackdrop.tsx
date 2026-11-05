@@ -1,17 +1,12 @@
-const TRACES = ['M0 220H210L285 295H470L540 365H780L910 235H1200', 'M0 440H185L280 345H450L540 255H815L940 380H1200', 'M80 0V145L255 320V590L145 700', 'M1120 0V160L945 335V560L1060 700'];
+const BOARD_SIZES = '(min-width: 1520px) 625px, (min-width: 1280px) calc(60vw - 280px), (min-width: 760px) calc(100vw - 300px), (max-width: 600px) calc(148vw - 48px), 100vw';
 
 export function NanoCircuitBackdrop() {
-  return <div className="cyber-nano-space" aria-hidden="true">
-    <picture>
-      <source type="image/avif" srcSet="./nano-circuit-substrate-960.avif 960w, ./nano-circuit-substrate-1280.avif 1280w, ./nano-circuit-substrate-1600.avif 1600w, ./nano-circuit-substrate-2400.avif 2400w" sizes="(min-width: 1520px) 1350px, (min-width: 1280px) calc(131vw - 638px), (min-width: 760px) calc(220vw - 682px), calc(220vw - 110px)" />
-      <source type="image/webp" srcSet="./nano-circuit-substrate-960.webp 960w, ./nano-circuit-substrate-1280.webp 1280w, ./nano-circuit-substrate-1600.webp 1600w, ./nano-circuit-substrate-2400.webp 2400w" sizes="(min-width: 1520px) 1350px, (min-width: 1280px) calc(131vw - 638px), (min-width: 760px) calc(220vw - 682px), calc(220vw - 110px)" />
-      <img className="cyber-nano-layer" src="./nano-circuit-substrate-1600.webp" width="1200" height="700" alt="" decoding="async" {...{ fetchpriority: 'low' }} />
+  return (
+    <picture className="cyber-nano-space" aria-hidden="true">
+      <source type="image/avif" srcSet="./nano-circuit-board-v3-960.avif 960w, ./nano-circuit-board-v3-1448.avif 1448w" sizes={BOARD_SIZES} />
+      <img className="cyber-nano-layer" src="./nano-circuit-board-v3-960.webp"
+        srcSet="./nano-circuit-board-v3-960.webp 960w, ./nano-circuit-board-v3-1448.webp 1448w" sizes={BOARD_SIZES}
+        width="1448" height="1086" alt="" decoding="async" draggable={false} {...{ fetchpriority: 'low' }} />
     </picture>
-    <svg className="cyber-nano-signals" viewBox="0 0 1200 700" fill="none">
-      {TRACES.map((d, index) => <g key={d} className={`cyber-nano-led led-${index % 3} cyber-nano-packet`} style={{ offsetPath: `path("${d}")` }}>
-        <circle r="7" fill="currentColor" stroke="none" opacity="0.15" />
-        <circle r="2" fill="#e7fff6" stroke="currentColor" strokeWidth="1" />
-      </g>)}
-    </svg>
-  </div>;
+  );
 }
