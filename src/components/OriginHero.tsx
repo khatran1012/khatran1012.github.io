@@ -1,4 +1,5 @@
 import React from 'react';
+import './origin-hero.css';
 import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import { PERSONAL_INFO } from '../data/cvData';
 import { SculptureCanvas } from './canvas/SculptureCanvas';
@@ -8,7 +9,7 @@ import { CopyEmailButton } from './CopyEmailButton';
 
 export const OriginHero: React.FC = () => {
   return (
-    <section id="origin" className="section hero-section" style={{ minHeight: '92vh', display: 'flex', alignItems: 'center', paddingTop: '6rem' }}>
+    <section id="origin" className="section hero-section">
       <div className="container" style={{ width: '100%' }}>
         <div className="hero-exhibit-grid">
           {/* Left Column: Manifesto & Narrative */}
@@ -26,44 +27,17 @@ export const OriginHero: React.FC = () => {
             </div>
 
             {/* Exhibition Monolithic Title */}
-            <h1
-              className="chapter-title"
-              style={{
-                fontSize: 'clamp(2.3rem, 4.4vw, 3.3rem)',
-                lineHeight: 1.08,
-                letterSpacing: '-0.04em',
-                marginBottom: '1rem',
-              }}
-            >
+            <h1 className="chapter-title hero-title">
               Thoughtful interfaces.<br />
               <span className="accent-patina">Resilient systems.</span>
             </h1>
 
-            <div
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.95rem',
-                color: 'var(--copper-warm-bright)',
-                marginBottom: '1.5rem',
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase',
-              }}
-            >
+            <div className="hero-stack">
               React / TypeScript · Golang · Offline-first IoT
             </div>
 
             {/* Core Manifesto - Not long clichés, but deep engineering philosophy */}
-            <div
-              style={{
-                borderLeft: '2px solid var(--copper-patina)',
-                paddingLeft: '1.25rem',
-                marginBottom: '2rem',
-                fontFamily: 'var(--font-body)',
-                fontSize: '1.08rem',
-                lineHeight: 1.7,
-                color: 'var(--text-secondary)',
-              }}
-            >
+            <div className="hero-narrative">
               <p style={{ color: 'var(--text-ivory)', fontWeight: 600, marginBottom: '0.5rem' }}>
                 I turn complex workflows into clear interfaces and dependable services.
               </p>
@@ -74,7 +48,7 @@ export const OriginHero: React.FC = () => {
             </div>
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div className="hero-actions">
               <a href="#reality" className="btn-arch btn-arch-patina">
                 <span>Explore My Work</span>
                 <ArrowDown size={17} />

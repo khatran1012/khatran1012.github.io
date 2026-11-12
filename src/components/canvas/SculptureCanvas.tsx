@@ -7,7 +7,7 @@ import {
   CIRCUIT_CHARGE_MS,
   CIRCUIT_BURST_MS,
 } from './CircuitSignalBoard';
-import { inspectorTracePaths, SignalDecode } from './InspectorSignal';
+import { inspectorTracePaths } from './InspectorSignal';
 import { MODULE_LIGHTS, MODULE_POSITIONS, type SystemModuleId } from './systemModuleLayout';
 import { CircuitParticles } from './CircuitParticles';
 import { ModuleEnergy } from './ModuleEnergy';
@@ -216,7 +216,7 @@ export const SculptureCanvas: React.FC = () => {
           <div className="cyber-core-title">
             <span className="cyber-status-led" />
             <span className="cyber-title-main">KT-CORE // SYSTEM ANATOMY</span>
-            <span className="cyber-title-status">● SIGNAL / PULSE</span>
+            <span className="cyber-title-status">INTERACTIVE</span>
           </div>
           <div className="cyber-node-tabs" role="group" aria-label="Select architecture module">
             {SYSTEM_NODES.map(node => (
@@ -262,11 +262,11 @@ export const SculptureCanvas: React.FC = () => {
           </div>
           <CircuitParticles />
           <span className="cyber-depth-label">NANO FABRIC / 05 MODULES</span>
-          <span className="cyber-scene-hint">HOVER TO ILLUMINATE / SELECT TO INSPECT</span>
+          <span className="cyber-scene-hint">EXPLORE THE SYSTEM</span>
         </div>
 
         <div className="cyber-core-footer">
-          <span className="cyber-signal-caption">Select a module to inspect. Select it again to close.</span>
+          <span className="cyber-signal-caption">Select a chip to explore · Select again to close</span>
         </div>
       </div>
       {inspectorOpen && (
@@ -292,10 +292,10 @@ export const SculptureCanvas: React.FC = () => {
               <button type="button" className="cyber-inspector-close" onClick={closeInspector} aria-label="Close module information"><X size={16} /></button>
               <div className="cyber-readout-copy">
                 <div className="cyber-readout-connection" aria-hidden="true"><span>MODULE / {displayedNode.number}</span><span><i />MODULE ACTIVE</span></div>
-                <span className="cyber-readout-eyebrow"><SignalDecode text={displayedNode.category} animate={revealing} /></span>
+                <span className="cyber-readout-eyebrow">{displayedNode.category}</span>
                 <div className="cyber-readout-head">
                   <span className={`cyber-readout-pill ${displayedNode.color}`}>
-                    <SignalDecode text={`${displayedNode.number} // ${displayedNode.name}`} animate={revealing} />
+                    {`${displayedNode.number} // ${displayedNode.name}`}
                   </span>
                   <span className="cyber-readout-sub">{displayedNode.subTitle}</span>
                 </div>

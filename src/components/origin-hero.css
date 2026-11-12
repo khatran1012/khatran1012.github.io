@@ -1,0 +1,77 @@
+/* Hero-specific presentation; keep the architecture exhibit's geometry intact. */
+.hero-section { min-height: 92vh; padding-top: 7.5rem; }
+.hero-section > .container { max-width: 1640px; }
+.hero-exhibit-grid { gap: clamp(2rem, 3.5vw, 4rem); }
+.hero-copy { max-width: 35rem; }
+.hero-copy .chapter-badge { margin-bottom: 1.6rem; font-size: .65rem; letter-spacing: .12em; }
+.hero-copy .candidate-identity { margin-bottom: 1.8rem; }
+.hero-copy .candidate-identity > p:first-child { font-size: clamp(1.8rem, 2.5vw, 2.6rem); }
+.hero-title { font-size: clamp(2.6rem, 3.6vw, 3.8rem); line-height: 1.06; letter-spacing: -.055em; margin-bottom: 1.4rem; text-wrap: balance; }
+.hero-title .accent-patina { display: inline-block; margin-top: .2em; }
+.hero-stack { max-width: 29rem; font: .7rem/1.9 var(--font-mono); color: var(--copper-warm-bright); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 1.6rem; }
+.hero-narrative { border-left: 1px solid var(--copper-patina); padding-left: 1.2rem; margin-bottom: 1.8rem; color: var(--text-secondary); font: 1rem/1.8 var(--font-body); }
+.hero-actions { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+.hero-actions .btn-arch { padding: .85rem 1.15rem; }
+.hero-exhibit-column { min-width: 0; }
+.hero-section .cyber-exhibit { grid-template-columns: minmax(0, 1fr) 17rem; gap: 1rem; align-items: start; }
+.hero-section .cyber-core-viewer { border-radius: 18px; border-color: var(--border-arch); box-shadow: 0 22px 65px -30px #0009; }
+.hero-section .cyber-core-header { padding: 1rem; gap: .9rem; }
+.hero-section .cyber-core-title { flex-wrap: wrap; font-size: .67rem; letter-spacing: .025em; }
+.hero-section .cyber-title-status { font-size: .53rem; letter-spacing: .1em; }
+.hero-section .cyber-node-tabs { width: 100%; gap: .3rem; }
+.hero-section .cyber-tab-btn { min-height: 36px; flex: 1 1 auto; font-size: .58rem; transition: background 180ms, color 180ms, border-color 180ms; }
+.hero-section .cyber-core-footer { padding: .85rem 1rem; }
+.hero-section .cyber-signal-caption { font-style: normal; font-size: .62rem; }
+.hero-section .cyber-module-inspector { align-self: stretch; display: flex; }
+.hero-section .cyber-footer-readout { width: 100%; display: flex; }
+.hero-section .cyber-default-readout, .hero-section .cyber-selection-banner { width: 100%; border-radius: 16px; padding: 1.2rem; max-height: none; }
+.hero-section .cyber-default-readout { display: flex; flex-direction: column; justify-content: center; gap: .9rem; background: radial-gradient(ellipse at top left, #32a89512, transparent 75%), var(--bg-surface); }
+.hero-section .cyber-default-readout strong { font: 500 1.5rem/1.25 var(--font-display, var(--font-body)); letter-spacing: -.03em; color: var(--text-ivory); }
+.hero-section .cyber-default-readout p { font: .85rem/1.75 var(--font-body); }
+.hero-section .cyber-readout-desc { font: .9rem/1.75 var(--font-body); color: var(--text-secondary); }
+.hero-section .cyber-readout-connection { font-size: .52rem; }
+.hero-section .cyber-readout-sub { font-size: .75rem; line-height: 1.6; }
+.hero-section .cyber-readout-specs { font-size: .7rem; line-height: 1.6; }
+.hero-section .cyber-inspector-close { width: 36px; height: 36px; top: .5rem; right: .5rem; border-radius: 8px; }
+.hero-section .cyber-readout-link { min-height: 40px; font-size: .72rem; }
+.hero-section .cyber-module:not(.is-core, .is-selected, :focus-visible) { filter: none; }
+.hero-section [data-selected='true'] .cyber-module:not(.is-core, .is-selected, :focus-visible) { opacity: .58; }
+.hero-section .cyber-module { transition: opacity 240ms ease; }
+.hero-section .cyber-scene-mist { opacity: .55; animation: none; }
+.hero-section .circuit-ribbon__vapor { opacity: .35; }
+.hero-section .circuit-ribbon__thread { animation-duration: 9s; }
+.hero-section [data-phase='transmitting'] .cyber-module-inspector :is(.cyber-readout-copy, .cyber-default-readout) { opacity: .55; filter: none; }
+.hero-section .cyber-readout-copy > * { --reveal-delay: 0ms; }
+@media (min-width: 1280px) {
+  .hero-exhibit-grid { grid-template-columns: minmax(0, .72fr) minmax(0, 1.6fr); align-items: center; }
+  .hero-copy { padding-top: 0; }
+}
+@media (min-width: 760px) and (max-width: 1279px) {
+  .hero-copy { max-width: 46rem; }
+  .hero-section .cyber-exhibit { grid-template-columns: minmax(0, 1fr) 18rem; }
+}
+@media (max-width: 759px) {
+  .hero-section { padding-top: 6rem; }
+  .hero-title { font-size: clamp(2.5rem, 9vw, 3.5rem); }
+  .hero-section .cyber-exhibit { display: block; }
+  .hero-section .cyber-module-inspector { margin-top: .8rem; }
+  .hero-section .cyber-default-readout { display: flex; }
+  .hero-section .cyber-tab-btn { min-height: 44px; }
+  .hero-section .cyber-inspector-close { width: 44px; height: 44px; }
+  .hero-section .cyber-readout-connection { padding-right: 2.5rem; }
+  .hero-section .cyber-core-header { padding: .8rem; }
+  .hero-section .cyber-title-status { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-section .cyber-module { transition: none; }
+}
+/* Keep hero rules independent of the global chapter styles. */
+.hero-section .hero-title { font-size: clamp(2.5rem, 3vw, 3.15rem); text-wrap: initial; }
+.hero-section .hero-exhibit-grid { align-items: center; }
+.hero-section .hero-copy { padding-top: 0; }
+@media (min-width: 1280px) {
+  .hero-section .hero-exhibit-grid { grid-template-columns: minmax(0, .85fr) minmax(0, 1.55fr); }
+}
+@media (max-width: 759px) {
+  .hero-section .hero-title { font-size: clamp(2.3rem, 8vw, 3rem); }
+}

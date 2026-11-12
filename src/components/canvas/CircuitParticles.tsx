@@ -33,7 +33,7 @@ export function CircuitParticles() {
       seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
       return seed / 4294967296;
     };
-    const particles = SOURCES.flatMap(source => Array.from({ length: 75 }, () => ({
+    const particles = SOURCES.flatMap(source => Array.from({ length: 36 }, () => ({
       source,
       offset: random(),
       speed: .12 + random() * .32,
@@ -42,7 +42,7 @@ export function CircuitParticles() {
       radius: .65 + random() ** 2 * 2.3,
       white: random() > .68,
     })));
-    const dust = Array.from({ length: 94 }, () => ({
+    const dust = Array.from({ length: 48 }, () => ({
       x: random() * BOARD_WIDTH, y: random() * BOARD_HEIGHT,
       radius: .45 + random() * 1.1, phase: random() * Math.PI * 2,
     }));
@@ -117,13 +117,14 @@ export function CircuitParticles() {
 
     const sync = () => {
       cancelAnimationFrame(frame);
+      canvas.closest('.cyber-exhibit')?.classList.toggle('is-offscreen', !visible || document.hidden);
       lastFrame = 0;
       if (visible && !document.hidden && !motion.matches) frame = requestAnimationFrame(tick);
       else if (motion.matches) { elapsed = 0; paint(); }
     };
     const intersection = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
-      canvas.closest('.cyber-exhibit')?.classList.toggle('is-offscreen', !visible);
+
       sync();
     });
     intersection.observe(canvas);
